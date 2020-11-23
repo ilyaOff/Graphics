@@ -90,13 +90,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib; $(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\MyLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\lib\x32;$(ProjectDir)Mylib\freeglut\lib;$(ProjectDir)Mylib\glew\lib\Release\Win32;$(ProjectDir)Mylib\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;freeimage.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -107,11 +107,17 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+	  <AdditionalIncludeDirectories>$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+	   <AdditionalLibraryDirectories>$(ProjectDir)Mylib\freeimage\lib\x64;$(ProjectDir)Mylib\freeglut\lib\x64;$(ProjectDir)Mylib\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew32.lib;freeimage.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies> 
     </Link>
+	<PostBuildEvent>
+      <Command>copy "$(ProjectDir)Mylib\freeglut\bin\x64\freeglut.dll" "$(OutputPath)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -123,15 +129,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib</AdditionalIncludeDirectories>
+	  <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\MyLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>      
+	  <AdditionalDependencies>glew32.lib;freeimage.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\lib\x32;$(ProjectDir)Mylib\freeglut\lib;$(ProjectDir)Mylib\glew\lib\Release\Win32;$(ProjectDir)Mylib\freeglut\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>   
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,6 +149,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <AdditionalIncludeDirectories>$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -151,6 +158,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+	 <PostBuildEvent>
+      <Command>copy "$(ProjectDir)Mylib\freeglut\bin\x64\freeglut.dll" "$(OutputPath)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GraphicTest.cpp" />
