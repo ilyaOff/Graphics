@@ -23,5 +23,28 @@
     <ClInclude Include="MyLib\glut-3.7\include\GL\glut.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="Models.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube1.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Pyramid.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CubeVertex.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="CubeFrag.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="PyramidVertex.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="PyramidFrag.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
   </ItemGroup>
 </Project>
