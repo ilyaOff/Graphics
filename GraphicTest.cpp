@@ -27,8 +27,8 @@ using namespace std;
 #include "Models.h"
 
 
-GLuint vertexBuffer;
-GLuint vertexArray;
+GLuint vertexBuffer[2];
+GLuint vertexArray[2];
 GLuint program;
 GLuint mvpLoc;
 GLuint mvpLoc2;
@@ -44,7 +44,7 @@ float yAngle2 = 0;
 void init()
 {
 	//glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	
 	//переделать
@@ -98,8 +98,7 @@ void init()
 	int log_len;
 	
 	glGetProgramInfoLog(program, /*sizeof(log) / sizeof(log[0]) - 1*/ 9999, &log_len, log);
-	log[log_len] = 0;
-	std::cout << "by "  <<sizeof(log) / sizeof(log[0]) - 1 << std::endl;
+	log[log_len] = 0;	
 	std::cout << "Shader compile result: " << log << std::endl;
 
 	mvpLoc = glGetUniformLocation(program, "mvp");
@@ -107,21 +106,33 @@ void init()
 
 	glUseProgramObjectARB(program);
 
-	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
+	glGenBuffers(2, vertexBuffer);//генерирует идентификатор буффера
+	glGenVertexArrays(2, vertexArray);//создаем вершинный массив
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буфефр
 	//загружаем данные в буффер
-	//glBufferData(GL_ARRAY_BUFFER,  sizeof(cube_vertices) + sizeof(pyramid_vertices), cube_vertices, GL_STATIC_DRAW);
-	//glBufferSubData(GL_ARRAY_BUFFER, sizeof(cube_vertices) , sizeof(pyramid_vertices), pyramid_vertices);
-	glBufferData(GL_ARRAY_BUFFER,  sizeof(pyramid_vertices), pyramid_vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER,  sizeof(cube_vertices) , cube_vertices, GL_STATIC_DRAW);
+		
+	
 
 	//указываем в буффере данных, что байты образуют вершины
-	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
-	glBindVertexArray(vertexArray);
+	
+	glBindVertexArray(vertexArray[0]);
 	//смещение = 0, размер 3 float, не нужно нормализовывать, 
 	//лежат один за другим, лежат в текущем буфере(последний 0)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);//номер атрибута 
 
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буфефр
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid_vertices), pyramid_vertices, GL_STATIC_DRAW);
+
+
+	glBindVertexArray(vertexArray[1]);
+	//смещение = 0, размер 3 float, не нужно нормализовывать, 
+	//лежат один за другим, лежат в текущем буфере(последний 0)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);//номер атрибута 
 	
 	//int attribLoc = glGetAttribLocation(program, "modelPos");
 	//glVertexAttribPointer(attribLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -130,7 +141,7 @@ void init()
 	glClearColor(0.0, 0.0, 0.0, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
 	//полностью - GL_FILL
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 glm::mat4x4 proj;
@@ -155,14 +166,19 @@ void display(void)
 		glm::translate(glm::vec3(0.0f, -0.5f, -3.0f)) *
 		glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f)) *
 		glm::rotate(yAngle2, glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
-	glUniformMatrix4fv(mvpLoc2, 1, GL_FALSE, &mvp2[0][0]);//определяем матрицу для шейдера
-	//glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, pyramid_indices);
-	//glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, cube_indices);
 
-	glDrawElements(GL_TRIANGLES, 0 + sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, pyramid_indices);
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
+	glUniformMatrix4fv(mvpLoc2, 1, GL_FALSE, &mvp2[0][0]);//определяем матрицу для шейдера2
 	
+
+	glBindVertexArray(vertexArray[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буффер
+	glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, pyramid_indices);
 	
+	glBindVertexArray(vertexArray[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буффер
+	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, cube_indices);
+
 	glFlush();//передает команды на исполнение
 	glutSwapBuffers();
 }
@@ -182,8 +198,9 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	proj = glm::perspectiveFovRH(Fov, float(W), float(H), 0.1f, 5.0f);
 	
 	*/
-	yAngle += (direction*5);
-	xAngle2 += (direction/10.0f );
+	//yAngle += (direction/5.0f);
+	yAngle2 += (direction/ 10.0f);
+	//xAngle2 += (direction/10.0f );
 	//xAngle += (direction * 5);
 	glutPostRedisplay();
 	//display();
