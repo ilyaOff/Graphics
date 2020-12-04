@@ -25,6 +25,7 @@ using namespace std;
 //#include <gl\glaux.h>                     // Заголовочный файл для GLaux библиотеки
 
 #include "Models.h"
+#include "Shader.h"
 const int N = 2;//количество моделей
 
 GLuint vertexBuffer[N];
@@ -44,9 +45,32 @@ float yAngle2 = 0;
 
 void initShaider()
 {
+	/*
+	Shader sh1("CubeVertex.glsl", "CubeFrag.glsl");
+	Shader sh2("PyramidVertex.glsl", "PyramidFrag.glsl");
+	char log[10000];
+	int log_len;
+	glGetProgramInfoLog(sh1.ID, sizeof(log) / sizeof(log[0]) - 1, &log_len, log);
+	log[log_len] = 0;
+	std::cout << "Shader" << sh1.ID << " compile result: " << log << std::endl;
+
+	glGetProgramInfoLog(sh1.ID, sizeof(log) / sizeof(log[0]) - 1, &log_len, log);
+	log[log_len] = 0;
+	std::cout << "Shader" << sh1.ID << " compile result: " << log << std::endl;
+
+	mvpLoc[0] = glGetUniformLocation(programs[0], "mvp");
+	mvLoc[0] = glGetUniformLocation(programs[0], "mv");
+	nmLoc[0] = glGetUniformLocation(programs[0], "nm");
+	mvpLoc[1] = glGetUniformLocation(programs[0], "mvp");
+	mvLoc[1] = glGetUniformLocation(programs[0], "mv");
+	nmLoc[1] = glGetUniformLocation(programs[0], "nm");
+	sh1.use();
+	sh2.use();
+	*/
 	string vsh_src[N];
 	string fsh_src[N];
 	//переделать
+	
 	fstream a("CubeVertex.glsl");// у меня не хочет без переменной работать
 	fstream b("CubeFrag.glsl");
 	vsh_src[0] = string((istreambuf_iterator<char>(a)), istreambuf_iterator<char>());
@@ -94,7 +118,7 @@ void initShaider()
 		glDeleteShader(fragment_shader);
 	
 
-		glGetProgramInfoLog(programs[i], /*sizeof(log) / sizeof(log[0]) - 1*/ 9999, &log_len, log);
+		glGetProgramInfoLog(programs[i], sizeof(log) / sizeof(log[0]) - 1 , &log_len, log);
 		log[log_len] = 0;
 		std::cout << "Shader" << i << " compile result: " << log << std::endl;
 
@@ -102,59 +126,8 @@ void initShaider()
 		mvLoc[i] = glGetUniformLocation(programs[0], "mv");
 		nmLoc[i] = glGetUniformLocation(programs[0], "nm");
 	}
-	/*
-	//Создание Объектов Shader And Program
-	programs[0] = glCreateProgram();
-	programs[1] = glCreateProgram();
-	GLenum vertex_shader = glCreateShader(GL_VERTEX_SHADER_ARB);
-	GLenum fragment_shader = glCreateShader(GL_FRAGMENT_SHADER_ARB);
-	GLenum vertex_shader2 = glCreateShader(GL_VERTEX_SHADER_ARB);
-	GLenum fragment_shader2 = glCreateShader(GL_FRAGMENT_SHADER_ARB);
-	// Загрузка шейдеров
-	const char* src = vsh_src.c_str();
-	glShaderSource(vertex_shader, 1, &src, NULL);
-
-	src = fsh_src.c_str();
-	glShaderSource(fragment_shader, 1, &src, NULL);
-
-	src = vsh_src2.c_str();
-	glShaderSource(vertex_shader2, 1, &src, NULL);
-
-	src = fsh_src2.c_str();
-	glShaderSource(fragment_shader2, 1, &src, NULL);
-	// Компиляция шейдеров
-	glCompileShader(vertex_shader);
-	glCompileShader(fragment_shader);
-	glCompileShader(vertex_shader2);
-	glCompileShader(fragment_shader2);
-	// Attach The Shader Objects To The Program Object
-	glAttachShader(programs[0], vertex_shader);
-	glAttachShader(programs[0], fragment_shader);
-	
-	glAttachShader(programs[1], vertex_shader2);
-	glAttachShader(programs[1], fragment_shader2);
-
-	// Link The Program Object
-	glLinkProgram(programs[0]);
-	glLinkProgram(programs[1]);
-
-	// Удаление шейдеров
-	glDeleteShader(vertex_shader);
-	glDeleteShader(fragment_shader);
-	glDeleteShader(vertex_shader2);
-	glDeleteShader(fragment_shader2);
-
-	char log[10000];
-	int log_len;
-	*/
 	//glGetProgramInfoLog(programs[0], /*sizeof(log) / sizeof(log[0]) - 1*/ 9999, &log_len, log);
-	/*log[log_len] = 0;
-	std::cout << "Shader1 compile result: " << log << std::endl;
-
-	glGetProgramInfoLog(programs[1], 9999, &log_len, log);
-	log[log_len] = 0;
-	std::cout << "Shader2 compile result: " << log << std::endl;
-	*/
+	
 	
 	glUseProgramObjectARB(programs[0]);
 	//glUseProgramObjectARB(programs[1]);
@@ -234,7 +207,6 @@ void display(void)
 	
 	//Пирамидка
 	glUseProgram(programs[1]);
-	/*glm::mat4x4*/ 	
 	
 	mv = glm::translate(glm::vec3(0.25f, -0.5f, -3.0f)) *
 		glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f)) *
