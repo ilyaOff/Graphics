@@ -30,10 +30,9 @@ const int N = 2;//количество моделей
 GLuint vertexBuffer[N];
 GLuint vertexArray[N];
 GLuint programs[N];
-GLuint mvpLoc;
-GLuint mvpLoc2;
-GLuint nmLoc;
-GLuint mvLoc;
+GLuint mvpLoc[N];
+GLuint nmLoc[N];
+GLuint mvLoc[N];
 
 float Fov = 45;
 int W, H;
@@ -98,6 +97,10 @@ void initShaider()
 		glGetProgramInfoLog(programs[i], /*sizeof(log) / sizeof(log[0]) - 1*/ 9999, &log_len, log);
 		log[log_len] = 0;
 		std::cout << "Shader" << i << " compile result: " << log << std::endl;
+
+		mvpLoc[i] = glGetUniformLocation(programs[0], "mvp");
+		mvLoc[i] = glGetUniformLocation(programs[0], "mv");
+		nmLoc[i] = glGetUniformLocation(programs[0], "nm");
 	}
 	/*
 	//Создание Объектов Shader And Program
@@ -152,13 +155,7 @@ void initShaider()
 	log[log_len] = 0;
 	std::cout << "Shader2 compile result: " << log << std::endl;
 	*/
-	mvpLoc = glGetUniformLocation(programs[0], "mvp");
-
-	mvLoc = glGetUniformLocation(programs[0], "mv");
-	nmLoc = glGetUniformLocation(programs[0], "nm");
 	
-
-	mvpLoc2 = glGetUniformLocation(programs[1], "mvp2");
 	glUseProgramObjectARB(programs[0]);
 	//glUseProgramObjectARB(programs[1]);
 }
@@ -228,20 +225,25 @@ void display(void)
 	glm::mat4x4 mvp = proj * mv;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
 
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
-	glUniformMatrix4fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
+	glUniformMatrix4fv(mvpLoc[0], 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
+	glUniformMatrix4fv(mvLoc[0], 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
+	glUniformMatrix4fv(nmLoc[0], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
 	glBindVertexArray(vertexArray[0]);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буффер
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, cube_indices);
 	
 	//Пирамидка
 	glUseProgram(programs[1]);
-	glm::mat4x4 mvp2 = proj *
-		glm::translate(glm::vec3(0.25f, -0.5f, -3.0f)) *
+	/*glm::mat4x4*/ 	
+	
+	mv = glm::translate(glm::vec3(0.25f, -0.5f, -3.0f)) *
 		glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f)) *
 		glm::rotate(yAngle2, glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(mvpLoc2, 1, GL_FALSE, &mvp2[0][0]);//определяем матрицу для шейдера2
+	mvp = proj * mv;
+	nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
+	glUniformMatrix4fv(mvpLoc[1], 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера2
+	glUniformMatrix4fv(mvLoc[1], 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
+	glUniformMatrix4fv(nmLoc[1], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
 	glBindVertexArray(vertexArray[1]);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буффер
 	glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, pyramid_indices);
@@ -304,7 +306,7 @@ int main(int argc, char** argv)
   
 	glewInit();
 	init();
-	glClearColor(0.5, 0.5, 0.5, 0.0);//задает цвет для заполнения буфера кадра
+	glClearColor(0.0, 0.0, 0.0, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
 	//полностью - GL_FILL
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

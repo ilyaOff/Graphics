@@ -5,6 +5,8 @@
 struct Vertex
 {
 	float x, y, z;
+	//glm::vec3 position;
+	//glm::vec3 normal;
 };
 #pragma pack()
 

@@ -3,7 +3,7 @@
 
 uniform mat4 mvp;
 uniform mat4 mv;
-uniform mat3 nm;
+//uniform mat3 nm;
 
 in vec3 modelPos;
 //in vec3 modelNormal;
