@@ -7,7 +7,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
-
+#define PI 3.14159265359
 
 //#include<vector>
 //#include<chrono>
@@ -28,13 +28,16 @@ using namespace std;
 #include "Shader.h"
 const int N = 2;//количество моделей
 
-GLuint vertexBuffer[N];
-GLuint vertexArray[N];
+GLuint vertexBuffer[N];//VBO
+GLuint vertexArray[N];//VAO
+GLuint EBO;
+GLuint EBO2;
 GLuint programs[N];
 GLuint mvpLoc[N];
 GLuint nmLoc[N];
 GLuint mvLoc[N];
-
+GLuint Light[N];
+GLfloat Dir[] = { 0.0f,-1.0f,0.0f };
 float Fov = 45;
 int W, H;
 float xAngle = 0;
@@ -45,7 +48,7 @@ float yAngle2 = 0;
 
 void initShaider()
 {
-	/*
+	
 	Shader sh1("CubeVertex.glsl", "CubeFrag.glsl");
 	Shader sh2("PyramidVertex.glsl", "PyramidFrag.glsl");
 	char log[10000];
@@ -54,19 +57,26 @@ void initShaider()
 	log[log_len] = 0;
 	std::cout << "Shader" << sh1.ID << " compile result: " << log << std::endl;
 
-	glGetProgramInfoLog(sh1.ID, sizeof(log) / sizeof(log[0]) - 1, &log_len, log);
+	glGetProgramInfoLog(sh2.ID, sizeof(log) / sizeof(log[0]) - 1, &log_len, log);
 	log[log_len] = 0;
-	std::cout << "Shader" << sh1.ID << " compile result: " << log << std::endl;
+	std::cout << "Shader" << sh2.ID << " compile result: " << log << std::endl;
 
+	programs[0] = sh1.ID;
+	
 	mvpLoc[0] = glGetUniformLocation(programs[0], "mvp");
 	mvLoc[0] = glGetUniformLocation(programs[0], "mv");
 	nmLoc[0] = glGetUniformLocation(programs[0], "nm");
-	mvpLoc[1] = glGetUniformLocation(programs[0], "mvp");
-	mvLoc[1] = glGetUniformLocation(programs[0], "mv");
-	nmLoc[1] = glGetUniformLocation(programs[0], "nm");
-	sh1.use();
-	sh2.use();
-	*/
+	Light[0] = glGetUniformLocation(programs[0], "dir");
+
+	programs[1] = sh2.ID;
+	
+	mvpLoc[1] = glGetUniformLocation(programs[1], "mvp");
+	mvLoc[1] = glGetUniformLocation(programs[1], "mv");
+	nmLoc[1] = glGetUniformLocation(programs[1], "nm");
+	Light[1] = glGetUniformLocation(programs[1], "LightDir");
+	//sh2.use();
+	
+	/*
 	string vsh_src[N];
 	string fsh_src[N];
 	//переделать
@@ -126,6 +136,7 @@ void initShaider()
 		mvLoc[i] = glGetUniformLocation(programs[0], "mv");
 		nmLoc[i] = glGetUniformLocation(programs[0], "nm");
 	}
+	*/
 	//glGetProgramInfoLog(programs[0], /*sizeof(log) / sizeof(log[0]) - 1*/ 9999, &log_len, log);
 	
 	
@@ -142,35 +153,50 @@ void init()
 
 	glGenBuffers(2, vertexBuffer);//генерирует идентификатор буффера
 	glGenVertexArrays(2, vertexArray);//создаем вершинный массив
+	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &EBO2);
+	//указываем в буффере данных, что байты образуют вершины
+	glBindVertexArray(vertexArray[0]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буфефр
 	//загружаем данные в буффер
 	glBufferData(GL_ARRAY_BUFFER,  sizeof(cube_vertices) , cube_vertices, GL_STATIC_DRAW);
 		
-	//указываем в буффере данных, что байты образуют вершины
 	
-	glBindVertexArray(vertexArray[0]);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
+
+	
 	//смещение = 0, размер 3 float, не нужно нормализовывать, 
 	//лежат один за другим, лежат в текущем буфере(последний 0)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glEnableVertexAttribArray(0);//номер атрибута 
+
+	//glBindVertexArray(0);
+	
+	glBindVertexArray(vertexArray[1]);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буфефр
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid_vertices), pyramid_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(pyramid_indices), pyramid_indices, GL_STATIC_DRAW);
 
 
-	glBindVertexArray(vertexArray[1]);
+
 	//смещение = 0, размер 3 float, не нужно нормализовывать, 
 	//лежат один за другим, лежат в текущем буфере(последний 0)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glEnableVertexAttribArray(0);//номер атрибута 
 	
 	//int attribLoc = glGetAttribLocation(program, "modelPos");
 	//glVertexAttribPointer(attribLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	//glEnableVertexAttribArray(attribLoc);
 
-	
+	//Отвязываем VAO(НЕ EBO)
+	//	glBindVertexArray(0);
+	glBindVertexArray(0);
 }
 
 glm::mat4x4 proj;
@@ -191,10 +217,13 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//КУб
+	glm::vec3 lll = glm::normalize(glm::vec3(-1.0f, 0.0f, 0.50f));
 	glUseProgram(programs[0]);
-	glm::mat4x4 mv = glm::translate(glm::vec3(-0.75f, 0.0f, -3.0f)) *
-		glm::rotate(xAngle, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::rotate(yAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+	glUniform3fv(Light[0],1, &lll[0]);
+	glm::mat4x4 mv = glm::translate(glm::vec3(-0.75f, 0.0f, -3.0f)) 
+		//glm::rotate(xAngle, glm::vec3(1.0f, 0.0f, 0.0f)) *
+		* glm::rotate(yAngle, glm::vec3(0.0f, 1.0f, 0.0f)) 
+		* glm::rotate(xAngle, glm::vec3(1 , 0.0f, 0));
 	glm::mat4x4 mvp = proj * mv;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
 
@@ -203,14 +232,15 @@ void display(void)
 	glUniformMatrix4fv(nmLoc[0], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
 	glBindVertexArray(vertexArray[0]);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буффер
-	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, cube_indices);
+	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0/*cube_indices*/);
 	
 	//Пирамидка
 	glUseProgram(programs[1]);
-	
-	mv = glm::translate(glm::vec3(0.25f, -0.5f, -3.0f)) *
-		glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f)) *
-		glm::rotate(yAngle2, glm::vec3(0.0f, 1.0f, 0.0f));
+	glUniform3fv(Light[1], 1, &lll[0]);
+	mv = glm::translate(glm::vec3(0.25f, -0.5f, -3.0f))
+		* glm::rotate(yAngle2, glm::vec3(0.0f, 1.0f, 0.0f)) 
+		* glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f));
+		
 	mvp = proj * mv;
 	nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
 	glUniformMatrix4fv(mvpLoc[1], 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера2
@@ -218,7 +248,7 @@ void display(void)
 	glUniformMatrix4fv(nmLoc[1], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
 	glBindVertexArray(vertexArray[1]);
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буффер
-	glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, pyramid_indices);
+	glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, 0/*pyramid_indices*/);
 	
 	
 	glFlush();//передает команды на исполнение

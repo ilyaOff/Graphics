@@ -6,7 +6,8 @@ uniform vec3 kLight = vec3(1.0,1.0,1.0);
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
 uniform vec4 LightColor = vec4(0.9,0.9,0.9,1.0);
-uniform vec3 LightDir = normalize(vec3(.5,0.5,0.5));//на источник
+//uniform vec3 LightDir;// = normalize(vec3(.5,0.5,0.5));//на источник
+uniform vec3 dir;
 
 //uniform vec4 MaterialAmbient = vec4(0.2,0.2,0.2,1.0);
 //uniform vec4 MaterialDiffuse = vec4(1,1,0.5,0);
@@ -49,6 +50,7 @@ vec4 FongLight(vec4 DiffuselightColor, vec3 lightdir, vec4 DiffuseMaterial,
 void main(void) {
 	//color = vec4(cubeVertex + vec3(0.5,0.5,0.5),0);
 	//color = vec4(1,1,0,0);
+	vec3 LightDir = dir;
 	vec4 mat =  vec4(cubeVertex + vec3(0.5,0.5,0.5),0);
 	color = FongLight(LightColor,LightDir,mat,	
 						LightColorAmbient, mat);
