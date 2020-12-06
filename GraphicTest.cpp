@@ -28,6 +28,10 @@ using namespace std;
 #include "Shader.h"
 const int N = 2;//количество моделей
 
+Model a;
+
+
+
 GLuint vertexBuffer[N];//VBO
 GLuint vertexArray[N];//VAO
 GLuint EBO;
@@ -37,7 +41,7 @@ GLuint mvpLoc[N];
 GLuint nmLoc[N];
 GLuint mvLoc[N];
 GLuint Light[N];
-GLfloat Dir[] = { 0.0f,-1.0f,0.0f };
+glm::vec3 Dir( 0.0f,1.0f,0.1f );
 float Fov = 45;
 int W, H;
 float xAngle = 0;
@@ -150,7 +154,11 @@ void init()
 	glFrontFace(GL_CW);
 	
 	initShaider();
-
+	Dir = glm::normalize(Dir);
+	a.Init(cube_vertices, sizeof(cube_vertices),
+		cube_indices, sizeof(cube_indices),
+		"CubeVertex.glsl", "CubeFrag.glsl");
+	a.Position = glm::vec3(0.0f, 0.5f, -2.5f);
 	glGenBuffers(2, vertexBuffer);//генерирует идентификатор буффера
 	glGenVertexArrays(2, vertexArray);//создаем вершинный массив
 	glGenBuffers(1, &EBO);
@@ -194,9 +202,7 @@ void init()
 	//glVertexAttribPointer(attribLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	//glEnableVertexAttribArray(attribLoc);
 
-	//Отвязываем VAO(НЕ EBO)
-	//	glBindVertexArray(0);
-	glBindVertexArray(0);
+	
 }
 
 glm::mat4x4 proj;
@@ -214,12 +220,14 @@ void display(void)
 		GL_COLOR_BUFFER_BIT-заполняет буфер кадра заранее настроенным цветом
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
 	*/
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	//КУб
-	glm::vec3 lll = glm::normalize(glm::vec3(-1.0f, 0.0f, 0.50f));
+	
 	glUseProgram(programs[0]);
-	glUniform3fv(Light[0],1, &lll[0]);
+	glBindVertexArray(vertexArray[0]);
+	glUniform3fv(Light[0],1, &Dir[0]);
 	glm::mat4x4 mv = glm::translate(glm::vec3(-0.75f, 0.0f, -3.0f)) 
 		//glm::rotate(xAngle, glm::vec3(1.0f, 0.0f, 0.0f)) *
 		* glm::rotate(yAngle, glm::vec3(0.0f, 1.0f, 0.0f)) 
@@ -230,13 +238,14 @@ void display(void)
 	glUniformMatrix4fv(mvpLoc[0], 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
 	glUniformMatrix4fv(mvLoc[0], 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
 	glUniformMatrix4fv(nmLoc[0], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
-	glBindVertexArray(vertexArray[0]);
+	
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[0]);//указываем активный буффер
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0/*cube_indices*/);
 	
 	//Пирамидка
 	glUseProgram(programs[1]);
-	glUniform3fv(Light[1], 1, &lll[0]);
+	glBindVertexArray(vertexArray[1]);
+	glUniform3fv(Light[1], 1, &Dir[0]);
 	mv = glm::translate(glm::vec3(0.25f, -0.5f, -3.0f))
 		* glm::rotate(yAngle2, glm::vec3(0.0f, 1.0f, 0.0f)) 
 		* glm::rotate(xAngle2, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -246,11 +255,27 @@ void display(void)
 	glUniformMatrix4fv(mvpLoc[1], 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера2
 	glUniformMatrix4fv(mvLoc[1], 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
 	glUniformMatrix4fv(nmLoc[1], 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
-	glBindVertexArray(vertexArray[1]);
+	
 	//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer[1]);//указываем активный буффер
 	glDrawElements(GL_TRIANGLES, sizeof(pyramid_indices) / sizeof(pyramid_indices[0]), GL_UNSIGNED_INT, 0/*pyramid_indices*/);
 	
-	
+	a.glDrawModel(proj,&Dir[0]);
+	/*
+	glUseProgram(a.program);
+	glBindVertexArray(a.vertexArray);
+	glUniform3fv(a.LightLoc, 1, &Dir[0]);
+	mv = glm::translate(a.Position)
+		//glm::rotate(xAngle, glm::vec3(1.0f, 0.0f, 0.0f)) *
+		* glm::rotate(a.Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f))
+		* glm::rotate(a.Rotation.x, glm::vec3(1, 0.0f, 0));
+	mvp = proj * mv;
+	nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
+
+	glUniformMatrix4fv(a.mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера
+	glUniformMatrix4fv(a.mvLoc, 1, GL_FALSE, &mv[0][0]);//определяем матрицу 	?
+	glUniformMatrix4fv(a.nmLoc, 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
+	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
+	*/
 	glFlush();//передает команды на исполнение
 	glutSwapBuffers();
 }
@@ -270,6 +295,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	proj = glm::perspectiveFovRH(Fov, float(W), float(H), 0.1f, 5.0f);
 	
 	*/
+	a.Rotation.y +=  (direction / 5.0f);
 	yAngle += (direction/5.0f);
 	xAngle += (direction / 5.0f);
 	yAngle2 += (direction/ 10.0f);
