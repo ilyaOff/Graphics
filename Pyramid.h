@@ -8,21 +8,21 @@
 	glm::vec3(0.5f, 0.0f, 0.5f ),//D
 	glm::vec3(0.0f, 1.5f, 0.0f ),//O
 };*/
-/*float pyramid_vertices[] = {
+float pyramid_vertices[] = {
 	 -0.5f, 0.0f,  0.5f,//A
 	 -0.5f, 0.0f, -0.5f ,//B
 	 0.5f, 0.0f, -0.5f,//C
 	 0.5f, 0.0f, 0.5f ,//D
 	 0.0f, 1.5f, 0.0f ,//O
-};*/
+};
 
-Vertex pyramid_vertices[] = {
+/*Vertex pyramid_vertices[] = {
 	{ -0.5f, 0.0f,  0.5f},//A
 	{ -0.5f, 0.0f, -0.5f },//B
 	{ 0.5f, 0.0f, -0.5f },//C
 	{ 0.5f, 0.0f, 0.5f },//D
 	{ 0.0f, 1.5f, 0.0f },//O
-};
+};*/
 
 GLuint pyramid_indices[] = {
 	0,2,1,

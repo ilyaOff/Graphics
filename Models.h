@@ -25,6 +25,8 @@ public:
 	GLuint vertexArray;//VAO
 	GLuint indexArray;//EBO or IBO
 
+	GLuint sizeIndex;
+
 	glm::vec3 Position;	
 	glm::vec3 Rotation;
 
@@ -33,17 +35,18 @@ public:
 	GLuint nmLoc;
 	GLuint mvLoc;
 	GLuint LightLoc;
+	GLenum modeDraw;
 
 	Model();
-	Model(GLfloat* vertices, GLuint size_vertices,
+	/*Model(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
-		const char* vertexPath, const char* fragmentPath);
+		const char* vertexPath, const char* fragmentPath);*/
 	~Model();
 	Model(const Model& a);//ј есть ли смысл в копировании?
-	void glDrawModel(glm::mat4 proj, GLfloat* Dir);
+	void glDrawModel(glm::mat4* proj, GLfloat* Dir, glm::mat4* CameraV = NULL);
 	void Init(GLfloat* vertices, GLuint size_vertices,
-				GLuint* ver_indices, GLuint size_indices,
-				const char* vertexPath, const char* fragmentPath);
+		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
+		const char* vertexPath, const char* fragmentPath);
 
 private:
 
@@ -66,7 +69,7 @@ Model::Model()
 	mvLoc = 0;
 	LightLoc = 0;
 }
-Model::Model(GLfloat* vertices,  GLuint size_vertices,
+/*Model::Model(GLfloat* vertices,  GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices,
 	const char* vertexPath, const char* fragmentPath)
 {
@@ -111,20 +114,25 @@ Model::Model(GLfloat* vertices,  GLuint size_vertices,
 	//лежат один за другим, лежат в текущем буфере(последний 0)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 	glEnableVertexAttribArray(0);//номер атрибута 
-	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0/*cube_indices*/);
+	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
 
-}
-void Model::glDrawModel(glm::mat4 proj,GLfloat* Dir)
+}*/
+void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
-	//std::cout << "DRAW" << endl;
+
 	//положение в пространстве
+	//glm::quat a = glm::quat(2);
 	glm::mat4x4 mv = glm::translate(Position)
 		* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f))
-		* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4x4 mvp = proj * mv;
+		* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	if (CameraV != NULL)
+	{
+		mv = (*CameraV) *mv;
+	}
+	glm::mat4x4 mvp = (*proj) * mv;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
 	//дл€ шейдеров
 	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу дл€ шейдера ћодельно-¬идова€-—проецированна€
@@ -133,11 +141,13 @@ void Model::glDrawModel(glm::mat4 proj,GLfloat* Dir)
 	//свет
 	glUniform3fv(LightLoc, 1, &Dir[0]);
 
-	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
+	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
 }
+
+
 void Model::Init(GLfloat* vertices, GLuint size_vertices,
-	GLuint* ver_indices, GLuint size_indices,
+	GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
 	const char* vertexPath, const char* fragmentPath)
 {
 	Shader sh(vertexPath, fragmentPath);
@@ -150,7 +160,7 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	//-----------------------------------------------//
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
 	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
+	this->modeDraw = modeDraw;
 	//создание массива вершин
 	if (points != NULL)
 		delete[] points;
@@ -175,7 +185,7 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	glBufferData(GL_ARRAY_BUFFER, size_vertices, &points[0], GL_STATIC_DRAW);
 
 
-
+	sizeIndex = size_indices/sizeof(ver_indices[0]);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &ver_indices[0], GL_STATIC_DRAW);
 
