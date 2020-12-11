@@ -17,6 +17,11 @@ struct Vertex
 #include "Shader.h"
 #define PI 3.14159265359
 
+
+glm::vec4 LightDirection(0.0f, 1.0f, 1.0f, 0.0f);//солнце
+
+
+
 class Model
 {
 	//Vertex* points;
@@ -37,7 +42,8 @@ public:
 	GLuint mLoc;
 	GLuint nmLoc;
 	GLuint LightLoc;
-	GLuint cameraLoc;
+	GLuint cameraPosLoc;
+	GLuint cameraRotLoc;
 	GLenum modeDraw;
 
 	Model();
@@ -46,7 +52,9 @@ public:
 		const char* vertexPath, const char* fragmentPath);*/
 	~Model();
 	Model(const Model& a);//ј есть ли смысл в копировании?
-	void glDrawModel(glm::mat4* proj, GLfloat* Dir, glm::mat4* CameraV = NULL);
+	void glDrawModel(glm::mat4* proj, glm::mat4* CameraPos = NULL, glm::mat4* CameraRot = NULL);
+	
+	
 	void Init(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
 		Shader sh, GLfloat* normals = NULL);
@@ -73,7 +81,8 @@ Model::Model()
 	nmLoc = 0;
 	mLoc = 0;
 	LightLoc = 0;
-	cameraLoc = 0;
+	cameraPosLoc = 0;
+	cameraRotLoc = 0;
 }
 /*Model::Model(GLfloat* vertices,  GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices,
@@ -123,7 +132,7 @@ Model::Model()
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
 
 }*/
-void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
+void Model::glDrawModel(glm::mat4* proj, glm::mat4* CameraPos, glm::mat4* CameraRot)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
@@ -134,13 +143,18 @@ void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
 		* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4x4 camera = glm::mat4x4(1.0);
-	if (CameraV != NULL)
+	glm::mat4x4 cameraPos = glm::mat4x4(1.0);
+	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
+	if (CameraPos != NULL)
 	{
-		camera = (*CameraV);
+		cameraPos = (*CameraPos);
 	}
-	glm::mat4x4 mvp = (*proj) * camera* m;
-	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(camera * m)));
+	if (CameraRot != NULL)
+	{
+		cameraRot = (*CameraRot);
+	}
+	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;
+	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(cameraRot * cameraPos * m)));
 	//glm::mat3x3 nm = glm::mat3x3(mv);
 	/*
 	cout << "nm " << program << endl;
@@ -169,11 +183,12 @@ void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
 	//дл€ шейдеров
 	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу дл€ шейдера ћодельно-¬идова€-—проецированна€
 	glUniformMatrix4fv(mLoc, 1, GL_FALSE, &m[0][0]);//определ€ем матрицу 	ћодельна€
-	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу  амеры//видова€
+	glUniformMatrix4fv(cameraPosLoc, 1, GL_FALSE, &cameraPos[0][0]);
+	glUniformMatrix4fv(cameraRotLoc, 1, GL_FALSE, &cameraRot[0][0]);
 
 	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу 	?
 	//свет	
-	glUniform3fv(LightLoc, 1,&Dir[0]);//повернули по камере
+	glUniform3fv(LightLoc, 1,&LightDirection[0]);
 
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
@@ -190,8 +205,10 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	mvpLoc = glGetUniformLocation(program, "mvp");
 	mLoc = glGetUniformLocation(program, "m");
 	nmLoc = glGetUniformLocation(program, "nm");
-	cameraLoc = glGetUniformLocation(program, "Camera");
+	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
+	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
 	
+	//LightLoc = glGetUniformLocation(program, "LightPos");
 	LightLoc = glGetUniformLocation(program, "LightDir");
 	std::cout << "MOdel ID=" << program << std::endl;
 	//-----------------------------------------------//

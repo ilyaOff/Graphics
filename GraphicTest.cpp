@@ -32,7 +32,7 @@ Model MyModel[N];
 float Fov = 45;
 int W, H;
 
-glm::mat4x4 CameraV ;
+
 glm::vec3 CameraPosition(1.0f, 0.0f, 0.0f);
 glm::vec3 CameraRotation(0.0f, 0.0f, 0.0f);
 const float step = 0.1f;
@@ -40,9 +40,6 @@ const float step = 0.1f;
 bool startMouseMove = false;
 bool MouseCursor = false;
 bool ModPolygon = true;
-
-glm::vec4 LightPosition( 0.0f,1.0f,1.0f, 0.0f );//солнце
-
 
 
 void init()
@@ -53,9 +50,8 @@ void init()
 	glClearColor(0.0, 0.1, 0.1, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
 	//полностью - GL_FILL
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
-	Dir = glm::normalize(Dir);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
+
 
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
@@ -110,20 +106,20 @@ void display(void)
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
 	*/	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	CameraV = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+	
+	glm::mat4x4 CameraRot= glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	//Свет-солнце поворочативается вместе с камерой
-	glm::vec3 a = glm::vec3(CameraV * Dir);
+	//glm::vec3 a = glm::vec3(CameraV * Dir);
 	
-	CameraV = CameraV * glm::translate(CameraPosition);
+	glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
 	
 	
 	for (int i = 0; i < N; i++)
 	{
 		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
-		MyModel[i].glDrawModel(&proj, &a[0], &CameraV);
+		MyModel[i].glDrawModel(&proj,  &CameraPos, &CameraRot);
 	}
 
 
@@ -229,6 +225,8 @@ void keypress(unsigned char key, int x, int y)
 		case'F':case 'f':
 			CameraPosition += step * glm::vec3(0, 1, 0);
 			glutPostRedisplay(); break;
+
+
 		case 'D':case 'd':
 			CameraPosition -= step*glm::vec3(cos(CameraRotation.y),0, sin(CameraRotation.y));
 			glutPostRedisplay(); break;
