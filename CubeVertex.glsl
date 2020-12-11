@@ -26,16 +26,16 @@ void main() {
 	lightDirection = light.xyz / light.w;
 	
 	vec4 pos =	 m * vec4(modelPos, 1) ;	
-	e = pos.xyz / pos.w ;//подвижный блик
-	//e = vec3(CameraRotation* pos);// неподвижный блик
-	e = vec3(CameraPosition* pos);// круглый блик
-	e = vec3(CameraRotation* pos);
+	//e = pos.xyz / pos.w ;//подвижный блик	
+	//e = vec3(CameraRotation* pos);// круглый блик !!!//темнее
+	e = vec3(pos) - Vec;//светлее !!!!!!!!!!!!!!!!!!!!оставьть эту
 
 	normal = normalize(nm * modelNormal);
 	//normal = normalize(mat3(m)* modelPos);
 
 	
 	//r =  2*dot(LightDir, normal)-LightDir;
-	r = (2*dot(lightDirection, normal)-lightDirection);
+	r = (2*dot(lightDirection, normal)-lightDirection);//!!
+
 	gl_Position = mvp * vec4(modelPos, 1.0);
 }

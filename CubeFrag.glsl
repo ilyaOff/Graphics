@@ -11,7 +11,7 @@ uniform float PowerGlare = 5.0f;
 
 uniform vec4 MaterialAmbient = vec4(0.2,0.2,0.2,1.0);
 uniform vec4 MaterialDiffuse = vec4(0.8,0.8,0.8,1);
-uniform vec4 MaterialSurface = vec4(1.2,1.2,1.2,1.0);
+uniform vec4 MaterialSurface = vec4(0.2,0.2,0.2,1.0);
 
 in vec3 Vertex;
 in vec3 normal;
@@ -49,9 +49,9 @@ vec4 FongLight(vec4 DiffuselightColor, vec3 lightdir, vec4 DiffuseMaterial,
 	vec4 ambient = AmbientColor(AmbientlightColor,  AmbientMaterial);
 	vec4 surface= SurfaceColor(SurfacelightColor, Reflection,  e,  SurfaceMaterial);
  
-	//if (dot(lightdir, normal) <= 0.0)
+	if (dot(lightdir, normal) <= 0.0)
 	{
-	//	surface = vec4(0.0, 0.0, 0.0, 0.0);
+		surface = vec4(0.0, 0.0, 0.0, 0.0);
 	}
 	
 	return ambient*kLight.x + diffuse * kLight.y + surface* kLight.z;

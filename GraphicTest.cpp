@@ -52,7 +52,7 @@ void init()
 	//полностью - GL_FILL
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
 
-
+	
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
@@ -65,7 +65,7 @@ void init()
 	MyModel[2].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("CubeVertex.glsl", "CubeFrag.glsl"));
-
+	//пол
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
 		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
@@ -80,13 +80,13 @@ void init()
 	MyModel[0].Position = glm::vec3(-1.75f, 0.0f, -0.0f);
 	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
 	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
-	MyModel[3].Position = glm::vec3(0.0f, -540.5f, 0.0f);
+	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
 
 	MyModel[0].Rotation = glm::vec3(0.0f, 60.0f, 0.0f);
 	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
 	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 45.0f);
-	MyModel[3].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
+	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 glm::mat4x4 proj;
@@ -146,7 +146,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	MyModel[0].Rotation.y +=  (direction / 5.0f);
 	MyModel[1].Rotation.y += (direction / 5.0f);
 	MyModel[2].Rotation.y += (direction / 5.0f);
-	MyModel[3].Rotation.x += (direction / 5.0f);
+	//MyModel[3].Rotation.x += (direction / 5.0f);
 	MyModel[4].Rotation.y += (direction / 5.0f);
 	glutPostRedisplay();
 	//display();
