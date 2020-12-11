@@ -8,7 +8,7 @@ uniform mat4 CameraRotation;
 uniform mat3 nm;
 //uniform vec3 LightPos;//солнце
 uniform vec3 LightDir;//солнце
-
+uniform vec3 Vec;
 
 in vec3 modelPos;
 in vec3 modelNormal;
@@ -21,13 +21,12 @@ out vec3 lightDirection;
 
 
 void main() {
-	Vertex = modelPos;
-	//lightDirection = //vec3(mv * vec4(LightDir, 1));//LightDir; //нормализован до шейдера
+	Vertex = modelPos;	
 	vec4 light = CameraRotation * vec4(LightDir, 1);
 	lightDirection = light.xyz / light.w;
 	
-	vec4 pos =	 m * vec4(modelPos, 1);	
-	e = pos.xyz / pos.w;
+	vec4 pos =	 m * vec4(modelPos, 1) ;	
+	e = pos.xyz / pos.w ;
 	//e = vec3(CameraRotation* pos);
 	
 	normal = normalize(nm * modelNormal);
@@ -35,8 +34,6 @@ void main() {
 
 	
 	//r =  2*dot(LightDir, normal)-LightDir;
-	r = normalize(  2*dot(LightDir, normal)-LightDir);//???
-
-
+	r = (2*dot(lightDirection, normal)-lightDirection);
 	gl_Position = mvp * vec4(modelPos, 1.0);
 }

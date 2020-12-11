@@ -119,7 +119,8 @@ void display(void)
 	for (int i = 0; i < N; i++)
 	{
 		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
-		MyModel[i].glDrawModel(&proj,  &CameraPos, &CameraRot);
+		//MyModel[i].glDrawModel(&proj,  &CameraPos, &CameraRot);
+		MyModel[i].glDrawModel(&proj, &CameraPosition, &CameraRotation);
 	}
 
 

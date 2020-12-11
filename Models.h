@@ -18,7 +18,7 @@ struct Vertex
 #define PI 3.14159265359
 
 
-glm::vec4 LightDirection(0.0f, 1.0f, 1.0f, 0.0f);//солнце
+glm::vec4 LightDirection(0.0f, 0.5f, 0.5f, 0.0f);//солнце
 
 
 
@@ -41,6 +41,7 @@ public:
 	GLuint mvpLoc;	
 	GLuint mLoc;
 	GLuint nmLoc;
+	GLuint VectorLoc;
 	GLuint LightLoc;
 	GLuint cameraPosLoc;
 	GLuint cameraRotLoc;
@@ -52,7 +53,7 @@ public:
 		const char* vertexPath, const char* fragmentPath);*/
 	~Model();
 	Model(const Model& a);//ј есть ли смысл в копировании?
-	void glDrawModel(glm::mat4* proj, glm::mat4* CameraPos = NULL, glm::mat4* CameraRot = NULL);
+	void glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* CameraRot);
 	
 	
 	void Init(GLfloat* vertices, GLuint size_vertices,
@@ -132,7 +133,7 @@ Model::Model()
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
 
 }*/
-void Model::glDrawModel(glm::mat4* proj, glm::mat4* CameraPos, glm::mat4* CameraRot)
+void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* CameraRot)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
@@ -147,11 +148,14 @@ void Model::glDrawModel(glm::mat4* proj, glm::mat4* CameraPos, glm::mat4* Camera
 	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
 	if (CameraPos != NULL)
 	{
-		cameraPos = (*CameraPos);
+		cameraPos = glm::translate(*CameraPos);
+	//	cameraPos = (*CameraPos);
 	}
 	if (CameraRot != NULL)
 	{
-		cameraRot = (*CameraRot);
+		cameraRot  = glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
+			* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(cameraRot * cameraPos * m)));
@@ -185,10 +189,11 @@ void Model::glDrawModel(glm::mat4* proj, glm::mat4* CameraPos, glm::mat4* Camera
 	glUniformMatrix4fv(mLoc, 1, GL_FALSE, &m[0][0]);//определ€ем матрицу 	ћодельна€
 	glUniformMatrix4fv(cameraPosLoc, 1, GL_FALSE, &cameraPos[0][0]);
 	glUniformMatrix4fv(cameraRotLoc, 1, GL_FALSE, &cameraRot[0][0]);
+	glUniform3fv(VectorLoc, 1, &(*CameraPos)[0]);
 
 	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу 	?
 	//свет	
-	glUniform3fv(LightLoc, 1,&LightDirection[0]);
+	glUniform3fv(LightLoc, 1,&(LightDirection)[0]);
 
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
@@ -207,7 +212,9 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	nmLoc = glGetUniformLocation(program, "nm");
 	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
 	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
-	
+	VectorLoc = glGetUniformLocation(program, "Vec");
+
+
 	//LightLoc = glGetUniformLocation(program, "LightPos");
 	LightLoc = glGetUniformLocation(program, "LightDir");
 	std::cout << "MOdel ID=" << program << std::endl;

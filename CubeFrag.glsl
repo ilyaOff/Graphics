@@ -1,7 +1,7 @@
 #version 330 core
 
 
-uniform vec3 kLight = vec3(0.0,1.0,0.0);
+uniform vec3 kLight = vec3(0.0,0.0,1.0);
 
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
@@ -36,8 +36,7 @@ vec4 DiffuseColor(vec4 lightColor, vec3 lightdir, vec4 material)
 }
 
 vec4 SurfaceColor(vec4 lightColor, vec3 reflection, vec3 e, vec4 material)
-{
-	//float k = pow(1-clamp(dot(e,reflection ),0.0,1.0), PowerGlare);
+{	
 	float k = pow(clamp(dot(e,reflection ),0.0,1.0), PowerGlare);
 	return k * material * lightColor;	
 }
@@ -67,5 +66,5 @@ void main(void) {
 	//color = vec4(normal + vec3(0.5,0.5,0.5), 1);
 	color = FongLight(LightColor,normalize(lightDirection),MaterialDiffuse,	
 						LightColorAmbient, mat/*MaterialAmbient*/,
-						LightColor, r, e, MaterialSurface);
+						LightColor, normalize(r), normalize(e), MaterialSurface);
 }
