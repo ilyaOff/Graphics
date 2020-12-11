@@ -191,12 +191,14 @@ void MouseFunc(int wheel, int direction, int x, int y)
 }*/
 void keypress(unsigned char key, int x, int y)
 {
+	//русские буквы не работают(
 	switch (key)
 	{
 		case 27:
 			glutDestroyWindow(glutGetWindow());
 			exit(1); break;
-		case 'T': case't':ModPolygon = !ModPolygon;
+		case 'Е':case 'е':case 'T': case't':
+			ModPolygon = !ModPolygon;
 			if (ModPolygon)
 			{
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -206,7 +208,8 @@ void keypress(unsigned char key, int x, int y)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			}
 			break;		
-		case 'Q': case 'q': MouseCursor = !MouseCursor;
+		case 'Й':case 'й':case 'Q': case 'q': 
+			MouseCursor = !MouseCursor;
 			if (MouseCursor)
 			{
 				glutSetCursor(GLUT_CURSOR_LEFT_ARROW);//включить курсор
@@ -220,24 +223,24 @@ void keypress(unsigned char key, int x, int y)
 		case ' ': CameraPosition = glm::vec3(0,0,0);
 					CameraRotation = glm::vec3(0, 0, 0);
 					startMouseMove = false; glutPostRedisplay(); break;
-		case 'R':case 'r':
+		case 'К':case 'к':case 'R':case 'r':
 			CameraPosition -= step * glm::vec3(0, 1, 0);
 			glutPostRedisplay(); break;
-		case'F':case 'f':
+		case'А':case 'а':case'F':case 'f':
 			CameraPosition += step * glm::vec3(0, 1, 0);
 			glutPostRedisplay(); break;
 
 
-		case 'D':case 'd':
+		case 'D':case 'd':case 'В':case 'в':
 			CameraPosition -= step*glm::vec3(cos(CameraRotation.y),0, sin(CameraRotation.y));
 			glutPostRedisplay(); break;
-		case'A':case 'a':
+		case'A':case 'a':case 'Ф':case 'ф':
 			CameraPosition += step * glm::vec3(cos(CameraRotation.y), 0, sin(CameraRotation.y));
 			glutPostRedisplay(); break;
-		case'W':case 'w':
+		case'W':case 'w':case 'Ц':case 'ц':
 			CameraPosition += step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
 			glutPostRedisplay(); break;
-		case'S':case 's':
+		case'S':case 's':case 'Ы':case 'ы':
 			CameraPosition -= step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
 			glutPostRedisplay(); break;
 	default:
