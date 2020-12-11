@@ -4,26 +4,28 @@
 #pragma pack(1)
 struct Vertex
 {
-	float x, y, z;
-	//glm::vec3 position;
-	//glm::vec3 normal;
+	//float x, y, z;
+	glm::vec3 position;
+	glm::vec3 normal;
 };
 #pragma pack()
 
 #include "Cube1.h"
 #include "Pyramid.h"
-
-
+#include "Floor.h"
+#include "Sphereh.h"
 #include "Shader.h"
-
+#define PI 3.14159265359
 
 class Model
 {
-	Vertex* points;
+	//Vertex* points;
 public:
 	GLuint vertexBuffer;//VBO
 	GLuint vertexArray;//VAO
 	GLuint indexArray;//EBO or IBO
+	//void *indexArrays;//EBO or IBO
+	//GLuint PointLoc;
 
 	GLuint sizeIndex;
 
@@ -31,10 +33,11 @@ public:
 	glm::vec3 Rotation;
 
 	GLuint program;
-	GLuint mvpLoc;
+	GLuint mvpLoc;	
+	GLuint mLoc;
 	GLuint nmLoc;
-	GLuint mvLoc;
 	GLuint LightLoc;
+	GLuint cameraLoc;
 	GLenum modeDraw;
 
 	Model();
@@ -46,7 +49,7 @@ public:
 	void glDrawModel(glm::mat4* proj, GLfloat* Dir, glm::mat4* CameraV = NULL);
 	void Init(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
-		const char* vertexPath, const char* fragmentPath);
+		Shader sh, GLfloat* normals = NULL);
 
 private:
 
@@ -54,11 +57,13 @@ private:
 
 Model::Model()
 {
-	points = NULL; 
+	//points = NULL; 
 	
 	vertexBuffer = 0;
 	vertexArray = 0;;
 	indexArray = 0;;
+	modeDraw = GL_TRIANGLES;
+	sizeIndex = 0;
 
 	Position = glm::vec3(0, 0, -1);
 	Rotation = glm::vec3(0, 0, 0);
@@ -66,8 +71,9 @@ Model::Model()
 	program = 0;
 	mvpLoc = 0;
 	nmLoc = 0;
-	mvLoc = 0;
+	mLoc = 0;
 	LightLoc = 0;
+	cameraLoc = 0;
 }
 /*Model::Model(GLfloat* vertices,  GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices,
@@ -124,22 +130,50 @@ void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
 
 	//положение в пространстве
 	//glm::quat a = glm::quat(2);
-	glm::mat4x4 mv = glm::translate(Position)
+	glm::mat4x4 m = glm::translate(Position)
 		* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4x4 camera = glm::mat4x4(1.0);
 	if (CameraV != NULL)
 	{
-		mv = (*CameraV) *mv;
+		camera = (*CameraV);
 	}
-	glm::mat4x4 mvp = (*proj) * mv;
-	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(mv)));
+	glm::mat4x4 mvp = (*proj) * camera* m;
+	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(camera * m)));
+	//glm::mat3x3 nm = glm::mat3x3(mv);
+	/*
+	cout << "nm " << program << endl;
+	glm::vec3 rrr = (nm * glm::vec3(0.5f, 0.5f, 0.5f));
+	cout << rrr.x;
+	cout << rrr.y;
+	cout << rrr.z;
+	cout << endl;
+	rrr = glm::mat3x3(mv) * glm::vec3(0.5f, 0.5f, 0.5f);
+	cout << "mv " << program << endl;
+	cout << rrr.x;
+	cout << rrr.y;
+	cout << rrr.z;
+	cout << endl << endl;
+	
+	cout << nm[0][0] << ' ' << nm[0][1] << ' ' << nm[0][2] << endl;
+	cout << nm[1][0] << ' ' << nm[1][1] << ' ' << nm[1][2] << endl;
+	cout << nm[2][0] << ' ' << nm[2][1] << ' ' << nm[2][2] << endl;
+	cout << endl;
+	cout << mv[0][0] << ' ' << mv[0][1] << ' ' << mv[0][2] << ' ' << mv[0][3] << endl;
+	cout << mv[1][0] << ' ' << mv[1][1] << ' ' << mv[1][2] << ' ' << mv[1][3] << endl;
+	cout << mv[2][0] << ' ' << mv[2][1] << ' ' << mv[2][2] << ' ' << mv[2][3] << endl;
+	cout << mv[3][0] << ' ' << mv[3][1] << ' ' << mv[3][2] << ' ' << mv[3][3] << endl;
+	cout << glm::determinant(nm) << ' ' << glm::determinant(mv) << endl;
+	*/
 	//дл€ шейдеров
 	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу дл€ шейдера ћодельно-¬идова€-—проецированна€
-	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, &mv[0][0]);//определ€ем матрицу 	ћодельно-¬идова€
-	glUniformMatrix4fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу 	?
-	//свет
-	glUniform3fv(LightLoc, 1, &Dir[0]);
+	glUniformMatrix4fv(mLoc, 1, GL_FALSE, &m[0][0]);//определ€ем матрицу 	ћодельна€
+	glUniformMatrix4fv(cameraLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу  амеры//видова€
+
+	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу 	?
+	//свет	
+	glUniform3fv(LightLoc, 1,&Dir[0]);//повернули по камере
 
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
@@ -148,30 +182,56 @@ void Model::glDrawModel(glm::mat4* proj,GLfloat* Dir, glm::mat4* CameraV)
 
 void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
-	const char* vertexPath, const char* fragmentPath)
+	Shader sh, GLfloat* normals )
 {
-	Shader sh(vertexPath, fragmentPath);
+	
 	program = sh.ID;
+
 	mvpLoc = glGetUniformLocation(program, "mvp");
-	mvLoc = glGetUniformLocation(program, "mv");
+	mLoc = glGetUniformLocation(program, "m");
 	nmLoc = glGetUniformLocation(program, "nm");
-	LightLoc = glGetUniformLocation(program, "dir");
+	cameraLoc = glGetUniformLocation(program, "Camera");
+	
+	LightLoc = glGetUniformLocation(program, "LightDir");
 	std::cout << "MOdel ID=" << program << std::endl;
 	//-----------------------------------------------//
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
 	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	this->modeDraw = modeDraw;
 	//создание массива вершин
-	if (points != NULL)
-		delete[] points;
-	points = new Vertex[size_vertices];
-	for (int i = 0; i < size_vertices; i++)
+	
+	Vertex* points = new Vertex[size_vertices];
+	for (GLuint i = 0; i < size_vertices/3; i++)
 	{
+		/*
 		points[i].x = vertices[i * 3];
 		points[i].y = vertices[i * 3 + 1];
 		points[i].z = vertices[i * 3 + 2];
+		*/
+		points[i].position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
 	}
+	if (normals != NULL)
+	{
+		for (GLuint i = 0; i < size_vertices / 3; i++)
+		{
+			/*
+			points[i].x = vertices[i * 3];
+			points[i].y = vertices[i * 3 + 1];
+			points[i].z = vertices[i * 3 + 2];
+			*/
+			points[i].normal  = glm::vec3(normals[i * 3], normals[i * 3+1], normals[i * 3+2]);
 
+
+		}
+	}
+	else
+	{
+		//Ќе расчет нормалей
+		for (GLuint i = 0; i < size_vertices / 3; i++)
+		{
+			points[i].normal = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+		}
+	}
 	//-----------------------------------------------//
 	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
 	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
@@ -182,31 +242,43 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
 	//загружаем данные в буффер
-	glBufferData(GL_ARRAY_BUFFER, size_vertices, &points[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size_vertices*sizeof(*points), points, GL_STATIC_DRAW);
 
 
-	sizeIndex = size_indices/sizeof(ver_indices[0]);
+	sizeIndex = size_indices/*/sizeof(ver_indices[0])*/;
+	//indexArrays = ver_indices;
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &ver_indices[0], GL_STATIC_DRAW);
 
 
 	//смещение = 0, размер 3 float, не нужно нормализовывать, 
-	//лежат один за другим, лежат в текущем буфере(последний 0)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-	glEnableVertexAttribArray(0);//номер атрибута 
-
-	//glBindVertexArray(0);
+	//лежат один за другим, // неверно дл€ больше 1 атрибута
+	//лежат в текущем буфере(последний 0)
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex)+0, /*(GLvoid*)*/0);
+	//glEnableVertexAttribArray(0);
+	int tmpLoc = glGetAttribLocation(program, "modelPos");
+	//PointLoc = tmpLoc;
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glEnableVertexAttribArray(tmpLoc);//номер атрибута 
+	tmpLoc = glGetAttribLocation(program, "modelNormal");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+	
+	glBindVertexArray(0);
 
 }
+
+
 Model::~Model()
 {
-	if (points != NULL)
+	//if (points != NULL)
 	{
-		delete[] points;
+	//	delete[] points;
 	}
 }
 
 //ј есть ли смысл в копировании?
+/*
 Model::Model(const Model& a)
 {
 	
@@ -230,4 +302,5 @@ Model::Model(const Model& a)
 	{
 		points[i] = a.points[i];
 	}
-}
+}*/
+

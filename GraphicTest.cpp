@@ -7,7 +7,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
-#define PI 3.14159265359
+//#define PI 3.14159265359// в Models.h
 
 //#include<vector>
 //#include<chrono>
@@ -26,25 +26,23 @@ using namespace std;
 
 #include "Models.h"
 #include "Shader.h"
-const int N = 3;//количество моделей
-
-
+const int N = 5;//количество моделей
 Model MyModel[N];
+
+float Fov = 45;
+int W, H;
+
 glm::mat4x4 CameraV ;
 glm::vec3 CameraPosition(1.0f, 0.0f, 0.0f);
 glm::vec3 CameraRotation(0.0f, 0.0f, 0.0f);
 const float step = 0.1f;
-int X = 0, Y = 0;
-bool start = false;
 
-glm::vec3 Dir( 0.0f,1.0f,0.1f );
-float Fov = 45;
-int W, H;
-float xAngle = 0;
-float yAngle = 60;
+bool startMouseMove = false;
+bool MouseCursor = false;
+bool ModPolygon = true;
 
-float xAngle2 = 0;
-float yAngle2 = 0;
+glm::vec4 LightPosition( 0.0f,1.0f,1.0f, 0.0f );//солнце
+
 
 
 void init()
@@ -52,40 +50,56 @@ void init()
 	glEnable(GL_DEPTH_TEST);//Включение теста по Z-буфферу
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
-	
+	glClearColor(0.0, 0.1, 0.1, 0.0);//задает цвет для заполнения буфера кадра
+	//только ребра  - GL_LINE
+	//полностью - GL_FILL
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	Dir = glm::normalize(Dir);
 
-
-
-
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
-		"CubeVertex.glsl", "CubeFrag.glsl");
+		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
+		cube_normal);
+
 	MyModel[1].Init(pyramid_vertices, sizeof(pyramid_vertices),
 		pyramid_indices, sizeof(pyramid_indices), GL_TRIANGLES,
-		"PyramidVertex.glsl", "PyramidFrag.glsl");
+		Shader("CubeVertex.glsl", "CubeFrag.glsl"));
 
 	MyModel[2].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
-		"CubeVertex.glsl", "CubeFrag.glsl");
+		Shader("CubeVertex.glsl", "CubeFrag.glsl"));
 
-	MyModel[0].Position = glm::vec3(-0.75f, 0.0f, -3.0f);
-	MyModel[1].Position = glm::vec3(0.25f, -0.5f, -3.0f);	
+	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
+		floor_indices, sizeof(floor_indices), GL_QUADS,
+		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
+		floor_normals);
+
+	Make_sphere(1);
+	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
+		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
+		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
+		sphere_normals);
+
+	MyModel[0].Position = glm::vec3(-1.75f, 0.0f, -0.0f);
+	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
 	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
+	MyModel[3].Position = glm::vec3(0.0f, -540.5f, 0.0f);
+	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
 
 	MyModel[0].Rotation = glm::vec3(0.0f, 60.0f, 0.0f);
 	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
 	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 45.0f);
-	
+	MyModel[3].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
 }
 
 glm::mat4x4 proj;
 void reshape(int w, int h)
 {
+	startMouseMove = false;
 	W = w; H = h;
 	glViewport(0, 0, w, h); // изменить размера буфера до размера окна
-	proj = glm::perspectiveFovRH(Fov, float(w), float(h), 0.1f, 5.0f);
+	proj = glm::perspectiveFovRH(Fov, float(w), float(h), 0.1f, 25.0f);
 	glutPostRedisplay();
 }
 
@@ -99,17 +113,22 @@ void display(void)
 
 	CameraV = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f))
-		* glm::translate(CameraPosition);
-
+		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	//Свет-солнце поворочативается вместе с камерой
+	glm::vec3 a = glm::vec3(CameraV * Dir);
+	
+	CameraV = CameraV * glm::translate(CameraPosition);
+	
+	
 	for (int i = 0; i < N; i++)
 	{
-		MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);		
+		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
+		MyModel[i].glDrawModel(&proj, &a[0], &CameraV);
 	}
 
 
 	glFlush();//передает команды на исполнение
-	glutSwapBuffers();
+	//glutSwapBuffers();
 }
 void idle(void) 
 {
@@ -130,28 +149,40 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	MyModel[0].Rotation.y +=  (direction / 5.0f);
 	MyModel[1].Rotation.y += (direction / 5.0f);
 	MyModel[2].Rotation.y += (direction / 5.0f);
-	
+	MyModel[3].Rotation.x += (direction / 5.0f);
+	MyModel[4].Rotation.y += (direction / 5.0f);
 	glutPostRedisplay();
 	//display();
 	//cout << yAngle << ' ' << yAngle2 << endl;
 }
 void MouseMove(int x, int y)
 {
-	if (start)
+	if (startMouseMove)
 	{
 		//CameraRotation.x += (X - x)/100.0f;
 		//X = x;
-		CameraRotation.y += (X - x) / 100.0f;
-		X = x;
-		glutPostRedisplay();
+		if (!MouseCursor)
+		{
+			float delta = ((float)x / W - 0.5f);
+			if (delta > 0.00006 || delta < -0.0006)
+				CameraRotation.y += 3.5f * delta;
+			delta = (float)y / H - 0.5f;
+			if(delta > 0.0007 || delta < -0.0007)
+				CameraRotation.x += 3.5f * (delta);
+			//if (CameraRotation.x > 15)
+			//	CameraRotation.x = 15;
+			//if (CameraRotation.x < -15)
+			//	CameraRotation.x = -15;
+			glutWarpPointer(W / 2, H / 2);
+			glutPostRedisplay();
+			//cout << ((float)y / H - 0.5f) << endl;
+		}
 	}
 	else
 	{
-		start = true;
-		X = x;
-		Y = y;
+		startMouseMove = true;
 	}
-	cout << "MOVE" << endl;
+
 	
 }
 /*
@@ -168,17 +199,62 @@ void keypress(unsigned char key, int x, int y)
 		case 27:
 			glutDestroyWindow(glutGetWindow());
 			exit(1); break;
-		//case ' ': Fov = 45;break;
-		case 'D':case 'd':CameraPosition.x -= step; glutPostRedisplay(); break;
-		case'A':case 'a':CameraPosition.x += step; glutPostRedisplay(); break;
-
-		case'W':case 'w':CameraPosition.z += step; glutPostRedisplay(); break;
-		case'S':case 's':CameraPosition.z -= step; glutPostRedisplay(); break;
+		case 'T': case't':ModPolygon = !ModPolygon;
+			if (ModPolygon)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
+			break;		
+		case 'Q': case 'q': MouseCursor = !MouseCursor;
+			if (MouseCursor)
+			{
+				glutSetCursor(GLUT_CURSOR_LEFT_ARROW);//включить курсор
+			}
+			else
+			{
+				glutSetCursor(GLUT_CURSOR_NONE);//убрать курсор
+				glutWarpPointer(W / 2, H / 2);
+			}
+			break;
+		case ' ': CameraPosition = glm::vec3(0,0,0);
+					CameraRotation = glm::vec3(0, 0, 0);
+					startMouseMove = false; glutPostRedisplay(); break;
+		case 'R':case 'r':
+			CameraPosition -= step * glm::vec3(0, 1, 0);
+			glutPostRedisplay(); break;
+		case'F':case 'f':
+			CameraPosition += step * glm::vec3(0, 1, 0);
+			glutPostRedisplay(); break;
+		case 'D':case 'd':
+			CameraPosition -= step*glm::vec3(cos(CameraRotation.y),0, sin(CameraRotation.y));
+			glutPostRedisplay(); break;
+		case'A':case 'a':
+			CameraPosition += step * glm::vec3(cos(CameraRotation.y), 0, sin(CameraRotation.y));
+			glutPostRedisplay(); break;
+		case'W':case 'w':
+			CameraPosition += step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
+			glutPostRedisplay(); break;
+		case'S':case 's':
+			CameraPosition -= step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
+			glutPostRedisplay(); break;
 	default:
 		break;
 	}
-	
-	std::cout << key << ' ' <<(int)key << endl;
+	/*
+	if (right != 0 || forward != 0)
+	{
+		float siny = sin(CameraRotation.y);
+		float cosy = cos(CameraRotation.y);
+		CameraPosition += step * glm::normalize(
+			forward * glm::vec3(siny, 0, cosy)
+			- right * glm::vec3(cosy, 0, siny));
+		glutPostRedisplay();
+	}*/
+	//std::cout << key << ' ' <<(int)key << endl;
 }
 int main(int argc, char** argv)
 {    
@@ -188,16 +264,14 @@ int main(int argc, char** argv)
   
 	glewInit();
 	init();
-	glClearColor(0.0, 0.0, 0.0, 0.0);//задает цвет для заполнения буфера кадра
-	//только ребра  - GL_LINE
-	//полностью - GL_FILL
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE |GLUT_DEPTH);
 
 
 	//ссылка на мои функции
 	glutMouseWheelFunc(MouseWheelFunc);
 	glutPassiveMotionFunc(MouseMove);
+	glutSetCursor(GLUT_CURSOR_NONE);//убрать курсор
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);

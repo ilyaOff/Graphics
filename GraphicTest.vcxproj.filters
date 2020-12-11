@@ -35,6 +35,12 @@
     <ClInclude Include="Shader.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Floor.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphereh.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertex.glsl">
