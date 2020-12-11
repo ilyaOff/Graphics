@@ -7,7 +7,7 @@ uniform vec3 kLight = vec3(0.0,0.0,1.0);
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
 uniform vec4 LightColor = vec4(1,1,1,1.0);
 
-uniform float PowerGlare = 2.0f;
+uniform float PowerGlare = 5.0f;
 
 uniform vec4 MaterialAmbient = vec4(0.2,0.2,0.2,1.0);
 uniform vec4 MaterialDiffuse = vec4(0.8,0.8,0.8,1);
