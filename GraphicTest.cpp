@@ -44,6 +44,9 @@ bool startMouseMove = false;
 bool MouseCursor = false;
 bool ModPolygon = true;
 
+float Time;
+float DeltaTime;
+bool startTime = false;
 
 void init()
 {
@@ -110,6 +113,7 @@ void reshape(int w, int h)
 	glViewport(0, 0, w, h); // изменить размера буфера до размера окна
 	proj = glm::perspectiveFovRH(Fov, float(w), float(h), 0.1f, 25.0f);
 	glutPostRedisplay();
+	startTime = false;
 }
 
 void display(void)
@@ -172,6 +176,19 @@ void display(void)
 void idle(void) 
 {
     //для анимации
+	if (!startTime)
+	{
+		DeltaTime = 0;
+		startTime = true;
+		Time = glutGet(GLUT_ELAPSED_TIME);
+		return;
+	}
+	DeltaTime = Time;
+	Time = glutGet(GLUT_ELAPSED_TIME);
+	DeltaTime = 0.0001*(Time - DeltaTime);
+	cout << DeltaTime << endl;
+	MyModel[2].Rotation.y += DeltaTime;//для себя
+	
 }
 
 void MouseWheelFunc(int wheel, int direction, int x, int y)
@@ -187,7 +204,8 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	*/
 	MyModel[0].Rotation.y +=  (direction / 5.0f);
 	MyModel[1].Rotation.y += (direction / 5.0f);
-	MyModel[2].Rotation.y += (direction / 5.0f);
+	MyModel[2].Rotation.x += (direction / 5.0f);
+	
 	//MyModel[3].Rotation.x += (direction / 5.0f);
 	MyModel[4].Position.y += (direction / 5.0f);
 	glutPostRedisplay();
@@ -202,8 +220,8 @@ void MouseMove(int x, int y)
 		//X = x;
 		if (!MouseCursor)
 		{
-			float delta = ((float)x / W - 0.5f);
-			if (delta > 0.00006 || delta < -0.0006)
+			float delta = (float)(x+x - W) /W/2;
+			//if (delta > 0.0003 || delta < -0.003)
 				CameraRotation.y += 3.5f * delta;
 			delta = (float)y / H - 0.5f;
 			if(delta > 0.0007 || delta < -0.0007)
