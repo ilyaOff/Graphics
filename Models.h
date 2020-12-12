@@ -18,7 +18,7 @@ struct Vertex
 #define PI 3.14159265359
 
 
-glm::vec4 LightDirection(0.0f, 2.0f, 2.0f, 0.0f);//солнце
+
 
 
 
@@ -53,7 +53,7 @@ public:
 		const char* vertexPath, const char* fragmentPath);*/
 	~Model();
 	Model(const Model& a);//А есть ли смысл в копировании?
-	void glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* CameraRot);
+	void glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos = NULL, glm::vec3* CameraRot = NULL);
 	
 	
 	void Init(GLfloat* vertices, GLuint size_vertices,
@@ -136,7 +136,7 @@ Model::Model()
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
 
 }*/
-void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* CameraRot)
+void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos, glm::vec3* CameraRot)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
@@ -155,13 +155,13 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* Camera
 	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
 	if (CameraPos != NULL)
 	{
-		cameraPos = glm::translate(*CameraPos);
+		cameraPos = glm::translate(-(*CameraPos));
 	//	cameraPos = (*CameraPos);
 	}
 	if (CameraRot != NULL)
 	{
 		cameraRot = 
-			//glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f)) *
+			glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f)) *
 			 glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
 			* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f));
 			
@@ -203,7 +203,7 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* Camera
 
 	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определяем матрицу 	?
 	//свет	
-	glUniform3fv(LightLoc, 1,&(LightDirection)[0]);
+	glUniform3fv(LightLoc, 1,&(*Light)[0]);
 
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 

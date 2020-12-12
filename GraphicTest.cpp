@@ -35,6 +35,8 @@ Model MyModel[N];
 float Fov = 45;
 int W, H;
 
+//glm::vec4 LightDirection(0.0f, 2.0f, 2.0f, 0.0f);//солнце
+glm::vec3 LightDirection(0.0f, 2.0f, 2.0f);//солнце
 
 glm::vec3 CameraPosition(1.0f, 0.0f, 0.0f);
 glm::vec3 CameraRotation(0.0f, 0.0f, 0.0f);
@@ -43,6 +45,7 @@ const float step = 0.1f;
 bool startMouseMove = false;
 bool MouseCursor = false;
 bool ModPolygon = true;
+bool SwapCamers = false;
 
 float Time;
 float DeltaTime;
@@ -73,7 +76,7 @@ void init()
 	MyModel[1].Init(pyramid_vertices, sizeof(pyramid_vertices),
 		pyramid_indices, sizeof(pyramid_indices), GL_TRIANGLES,
 		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"));
-	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
+	MyModel[1].Position = glm::vec3(1.75f, -0.5f, 0.0f);
 	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
 
 
@@ -90,7 +93,7 @@ void init()
 		floor_normals);
 	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
 	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	MyModel[3].UseMaterial(&(glm::vec4(0,0,0.5f,1))[0]);
+	MyModel[3].UseMaterial(&(glm::vec4(0,0,0.5f,0.5f))[0]);
 	
 
 	Make_sphere(1);
@@ -130,48 +133,94 @@ void display(void)
 	//Свет-солнце поворочативается вместе с камерой
 	//glm::vec3 a = glm::vec3(CameraV * Dir);	
 	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
-
-	
+	glEnable(GL_LIGHTING);//????????????????
+	//-------------------------------------------------//
 	glEnable(GL_STENCIL_TEST);//Буфер трафарета
 	glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);//Настройки теста буфера трафарета
 	
-	glDisable(GL_DEPTH_TEST);
-	glStencilFunc(GL_ALWAYS, 1, 1);//рисуем  зеркало
+	//glDisable(GL_DEPTH_TEST);
+	glDepthMask(GL_FALSE);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);//рисуем  зеркало
 	
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
 
-	MyModel[3].glDrawModel(&proj, &(CameraPosition), &CameraRotation);//зеркало
+	MyModel[3].glDrawModel(&proj, &(LightDirection),&(CameraPosition), &CameraRotation);//зеркало
 	
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 
-	glEnable(GL_DEPTH_TEST);
-
+	//glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
-	glStencilFunc(GL_EQUAL, 1, 1);//рисуем только там, где зеркало
+	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
 
-	glm::vec3 CamZerPos = (MyModel[3].Position  - (CameraPosition + MyModel[3].Position));
+
+	/*
+	glm::mat4x4 m = glm::translate(MyModel[3].Position)
+		* glm::mat4x4(glm::quat(MyModel[3].Rotation));
+	glm::mat4x4 camera =
+		glm::rotate((CameraRotation).z, glm::vec3(0.0f, 0.0f, 1.0f))
+		* glm::rotate((CameraRotation).x, glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::rotate((CameraRotation).y, glm::vec3(0.0f, 1.0f, 0.0f))
+		* glm::translate(CameraPosition);	
+		
+	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(camera * m)));
+	*/
+	
+	glm::vec3 CamZerPos = //(MyModel[3].Position  - (CameraPosition + MyModel[3].Position));
+			glm::vec3(CameraPosition.x,
+				MyModel[3].Position.y - (CameraPosition.y - MyModel[3].Position.y),
+				CameraPosition.z);//Проверить поворот
+
+	glm::vec3 lightRef = glm::vec3(LightDirection.x,
+		MyModel[3].Position.y - (LightDirection.y - MyModel[3].Position.y),
+		LightDirection.z);//Проверить поворот
+
+
+	std::cout << "CAM " <<
+		CameraPosition.x << ' ' << CameraPosition.y << ' ' << CameraPosition.z  << endl;
+	std::cout << "Reflect " <<
+		MyModel[3].Position.x << ' ' << MyModel[3].Position.y << ' ' << MyModel[3].Position.z << endl;
+	std::cout << "RCAM " <<
+		CamZerPos.x << ' ' << CamZerPos.y << ' ' << CamZerPos.z << endl << endl;
+
 	glm::vec3 CamZerRot = glm::vec3(-CameraRotation.x, CameraRotation.y, CameraRotation.z);
+
 	for (int i = 0; i < N; i++)
 	{		
-		if( i != 3)
-		MyModel[i].glDrawModel(&proj, &CamZerPos, &CamZerRot);
+		if(i != 3)
+		MyModel[i].glDrawModel(&proj, &(lightRef),&CamZerPos, &CamZerRot);
 	}
 
-	glDisable(GL_STENCIL_TEST);
-	//MyModel[4].glDrawModel(&proj, &CameraPosition, &CameraRotation);
+	//glDisable(GL_STENCIL_TEST);
+	glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
+	//-------------------------------------------------//
 	for (int i = 0; i < N; i++)
 	{
-		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
-		//MyModel[i].glDrawModel(&proj,  &CameraPos, &CameraRot);
-		//if(i != 3)
-		MyModel[i].glDrawModel(&proj, &CameraPosition, &CameraRotation);
+		if(i != 3)
+		MyModel[i].glDrawModel(&proj,&(LightDirection), &CameraPosition, &CameraRotation);
 	}
-	//glStencilMask(0xFF);
-	glEnable(GL_DEPTH_TEST);
+	//MyModel[3].Position += glm::vec3(0, -0.001f, 0);
+	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
+	//MyModel[3].Position += glm::vec3(0, 0.001f, 0);
+	/*glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
+	glDisable(GL_BLEND);*/
 
+
+	if (SwapCamers)
+	{
+		CameraPosition = CamZerPos;
+		CameraRotation = CamZerRot;
+		SwapCamers = false;
+	}
+
+
+	glutSwapBuffers();
 	glFlush();//передает команды на исполнение
-	//glutSwapBuffers();
+	
 }
 void idle(void) 
 {
@@ -185,8 +234,7 @@ void idle(void)
 	}
 	DeltaTime = Time;
 	Time = glutGet(GLUT_ELAPSED_TIME);
-	DeltaTime = 0.0001*(Time - DeltaTime);
-	cout << DeltaTime << endl;
+	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
 	
 }
@@ -220,10 +268,13 @@ void MouseMove(int x, int y)
 		//X = x;
 		if (!MouseCursor)
 		{
-			float delta = (float)(x+x - W) /W/2;
+			//влево-вправо
+			float delta = (float)(x+x - W) /(W+W);
 			//if (delta > 0.0003 || delta < -0.003)
 				CameraRotation.y += 3.5f * delta;
-			delta = (float)y / H - 0.5f;
+
+			//Вверх-вних
+			delta = (float)(y + y -H) / (H + H);
 			if(delta > 0.0007 || delta < -0.0007)
 				CameraRotation.x += 3.5f * (delta);
 			//if (CameraRotation.x > 15)
@@ -257,6 +308,8 @@ void keypress(unsigned char key, int x, int y)
 		case 27:
 			glutDestroyWindow(glutGetWindow());
 			exit(1); break;
+		case 'U': case'u':
+			SwapCamers = true; break;
 		case 'Е':case 'е':case 'T': case't':
 			ModPolygon = !ModPolygon;
 			if (ModPolygon)
@@ -283,25 +336,26 @@ void keypress(unsigned char key, int x, int y)
 		case ' ': CameraPosition = glm::vec3(0,0,0);
 					CameraRotation = glm::vec3(0, 0, 0);
 					startMouseMove = false; glutPostRedisplay(); break;
-		case 'К':case 'к':case 'R':case 'r':
-			CameraPosition -= step * glm::vec3(0, 1, 0);
-			glutPostRedisplay(); break;
-		case'А':case 'а':case'F':case 'f':
+
+
+		case 'R':case 'r'://case 'К':case 'к':
 			CameraPosition += step * glm::vec3(0, 1, 0);
 			glutPostRedisplay(); break;
+		case'F':case 'f'://case'А':case 'а':
+			CameraPosition -= step * glm::vec3(0, 1, 0);
+			glutPostRedisplay(); break;
 
-
-		case 'D':case 'd':case 'В':case 'в':
-			CameraPosition -= step*glm::vec3(cos(CameraRotation.y),0, sin(CameraRotation.y));
+		case 'D':case 'd'://case 'В':case 'в':
+			CameraPosition += step*glm::vec3(cos(CameraRotation.y),0, sin(CameraRotation.y));
 			glutPostRedisplay(); break;
-		case'A':case 'a':case 'Ф':case 'ф':
-			CameraPosition += step * glm::vec3(cos(CameraRotation.y), 0, sin(CameraRotation.y));
+		case'A':case 'a'://case 'Ф':case 'ф':
+			CameraPosition -= step * glm::vec3(cos(CameraRotation.y), 0, sin(CameraRotation.y));
 			glutPostRedisplay(); break;
-		case'W':case 'w':case 'Ц':case 'ц':
-			CameraPosition += step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
-			glutPostRedisplay(); break;
-		case'S':case 's':case 'Ы':case 'ы':
+		case'W':case 'w'://case 'Ц':case 'ц':
 			CameraPosition -= step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
+			glutPostRedisplay(); break;
+		case'S':case 's'://case 'Ы':case 'ы':
+			CameraPosition += step * glm::vec3(sin(-CameraRotation.y), 0, cos(CameraRotation.y));
 			glutPostRedisplay(); break;
 	default:
 		break;
