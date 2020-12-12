@@ -41,6 +41,9 @@
     <ClInclude Include="Sphereh.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="Cat.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertex.glsl">

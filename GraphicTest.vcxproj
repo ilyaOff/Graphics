@@ -166,6 +166,7 @@
     <ClCompile Include="GraphicTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cat.h" />
     <ClInclude Include="Cube1.h" />
     <ClInclude Include="Floor.h" />
     <ClInclude Include="Models.h" />

@@ -60,6 +60,9 @@ public:
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
 		Shader sh, GLfloat* normals = NULL);
 
+	void Use() { glUseProgram(program); }
+	void UseMaterial(GLfloat* DiffuseMaterial);
+
 private:
 
 };
@@ -137,13 +140,17 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* Camera
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
-
+	
 	//положение в пространстве
 	//glm::quat a = glm::quat(2);
+	
+	glm::quat a = glm::quat(Rotation);
+	
 	glm::mat4x4 m = glm::translate(Position)
-		* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		* glm::mat4x4(a);
+	//	* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+	//	* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
+	//	* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4x4 cameraPos = glm::mat4x4(1.0);
 	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
 	if (CameraPos != NULL)
@@ -153,9 +160,12 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* CameraPos, glm::vec3* Camera
 	}
 	if (CameraRot != NULL)
 	{
-		cameraRot  = glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
+		cameraRot = 
+			//glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f)) *
+			 glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
 			* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f));
+			
+			//glm::mat4x4(glm::quat(*CameraRot));
 	}
 	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(cameraRot * cameraPos * m)));
@@ -290,6 +300,13 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	
 	glBindVertexArray(0);
 
+}
+
+void Model::UseMaterial(GLfloat* DiffuseMaterial)
+{
+	this->Use();
+	GLuint Param = glGetUniformLocation(program, "MaterialDiffuse");
+	glUniform4fv(Param, 1, DiffuseMaterial);
 }
 
 

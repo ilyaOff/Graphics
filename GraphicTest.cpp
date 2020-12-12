@@ -4,6 +4,9 @@
 #include<glm.hpp>
 #include<gtx/transform.hpp>
 
+#include <gtc/quaternion.hpp> 
+#include <gtx/quaternion.hpp>
+
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -48,8 +51,7 @@ void init()
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 
-	glEnable(GL_STENCIL_TEST);//Буфер трафарета
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);//Настройки теста буфера трафарета
+	
 
 	glClearColor(0.0, 0.1, 0.1, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
@@ -67,16 +69,16 @@ void init()
 
 	MyModel[1].Init(pyramid_vertices, sizeof(pyramid_vertices),
 		pyramid_indices, sizeof(pyramid_indices), GL_TRIANGLES,
-		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
+		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"));
 	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
 	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
 
 
 	MyModel[2].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
-		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
+		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"));
 	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
-	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 45.0f);
+	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 0.0f);
 
 	//пол
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
@@ -85,12 +87,13 @@ void init()
 		floor_normals);
 	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
 	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
+	MyModel[3].UseMaterial(&(glm::vec4(0,0,0.5f,1))[0]);
+	
 
 	Make_sphere(1);
 	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
 		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
-		Shader("CubeVertex.glsl", "PyramidFrag.glsl"),
+		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
 		sphere_normals);
 
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
@@ -121,28 +124,47 @@ void display(void)
 //		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 	//	* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	//Свет-солнце поворочативается вместе с камерой
-	//glm::vec3 a = glm::vec3(CameraV * Dir);
-	
+	//glm::vec3 a = glm::vec3(CameraV * Dir);	
 	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
+
 	
+	glEnable(GL_STENCIL_TEST);//Буфер трафарета
+	glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);//Настройки теста буфера трафарета
 	
+	glDisable(GL_DEPTH_TEST);
+	glStencilFunc(GL_ALWAYS, 1, 1);//рисуем  зеркало
 	
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
 
-	//glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	//glStencilMask(0xFF);
-	//MyModel[4].glDrawModel(&proj, &(-CameraPosition), &CameraRotation);
-
-	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	//glStencilMask(0x00);
+	MyModel[3].glDrawModel(&proj, &(CameraPosition), &CameraRotation);//зеркало
+	
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 
+	glEnable(GL_DEPTH_TEST);
+
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
+	glStencilFunc(GL_EQUAL, 1, 1);//рисуем только там, где зеркало
+
+	glm::vec3 CamZerPos = (MyModel[3].Position  - (CameraPosition + MyModel[3].Position));
+	glm::vec3 CamZerRot = glm::vec3(-CameraRotation.x, CameraRotation.y, CameraRotation.z);
+	for (int i = 0; i < N; i++)
+	{		
+		if( i != 3)
+		MyModel[i].glDrawModel(&proj, &CamZerPos, &CamZerRot);
+	}
+
+	glDisable(GL_STENCIL_TEST);
+	//MyModel[4].glDrawModel(&proj, &CameraPosition, &CameraRotation);
 	for (int i = 0; i < N; i++)
 	{
 		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
 		//MyModel[i].glDrawModel(&proj,  &CameraPos, &CameraRot);
+		//if(i != 3)
 		MyModel[i].glDrawModel(&proj, &CameraPosition, &CameraRotation);
 	}
-
+	//glStencilMask(0xFF);
+	glEnable(GL_DEPTH_TEST);
 
 	glFlush();//передает команды на исполнение
 	//glutSwapBuffers();
