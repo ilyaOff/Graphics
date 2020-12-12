@@ -1,7 +1,7 @@
 #version 330 core
 
 
-uniform vec3 kLight = vec3(1.0,1.0,1.0);
+uniform vec3 kLight = vec3(0.0,0.0,1.0);
 
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);

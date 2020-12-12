@@ -18,7 +18,7 @@ struct Vertex
 #define PI 3.14159265359
 
 
-glm::vec4 LightDirection(0.0f, 0.5f, 0.5f, 0.0f);//солнце
+glm::vec4 LightDirection(0.0f, 2.0f, 2.0f, 0.0f);//солнце
 
 
 

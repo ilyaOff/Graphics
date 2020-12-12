@@ -47,11 +47,15 @@ void init()
 	glEnable(GL_DEPTH_TEST);//Включение теста по Z-буфферу
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
+
+	glEnable(GL_STENCIL_TEST);//Буфер трафарета
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);//Настройки теста буфера трафарета
+
 	glClearColor(0.0, 0.1, 0.1, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
 	//полностью - GL_FILL
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);		
+	
 	
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
@@ -60,11 +64,11 @@ void init()
 
 	MyModel[1].Init(pyramid_vertices, sizeof(pyramid_vertices),
 		pyramid_indices, sizeof(pyramid_indices), GL_TRIANGLES,
-		Shader("CubeVertex.glsl", "CubeFrag.glsl"));
+		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
 
 	MyModel[2].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
-		Shader("CubeVertex.glsl", "CubeFrag.glsl"));
+		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
 	//пол
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
@@ -74,10 +78,10 @@ void init()
 	Make_sphere(1);
 	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
 		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
-		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
+		Shader("CubeVertex.glsl", "PyramidFrag.glsl"),
 		sphere_normals);
 
-	MyModel[0].Position = glm::vec3(-1.75f, 0.0f, -0.0f);
+	MyModel[0].Position = glm::vec3(0.0f, 2.0f, 2.0f);
 	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
 	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
 	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
@@ -105,17 +109,27 @@ void display(void)
 		GL_COLOR_BUFFER_BIT-заполняет буфер кадра заранее настроенным цветом
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
 	*/	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glm::mat4x4 CameraRot= glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	//glm::mat4x4 CameraRot= glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+//		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
+	//	* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	//Свет-солнце поворочативается вместе с камерой
 	//glm::vec3 a = glm::vec3(CameraV * Dir);
 	
-	glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
+	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
 	
 	
+	
+
+	//glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	//glStencilMask(0xFF);
+	//MyModel[4].glDrawModel(&proj, &(-CameraPosition), &CameraRotation);
+
+	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	//glStencilMask(0x00);
+
+
 	for (int i = 0; i < N; i++)
 	{
 		//MyModel[i].glDrawModel(&proj, &Dir[0], &CameraV);
@@ -147,7 +161,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	MyModel[1].Rotation.y += (direction / 5.0f);
 	MyModel[2].Rotation.y += (direction / 5.0f);
 	//MyModel[3].Rotation.x += (direction / 5.0f);
-	MyModel[4].Rotation.y += (direction / 5.0f);
+	MyModel[4].Position.y += (direction / 5.0f);
 	glutPostRedisplay();
 	//display();
 	//cout << yAngle << ' ' << yAngle2 << endl;
@@ -267,7 +281,7 @@ int main(int argc, char** argv)
 	glewInit();
 	init();
 
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE |GLUT_DEPTH);
+	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB |GLUT_DEPTH|GLUT_STENCIL);
 
 
 	//ссылка на мои функции
