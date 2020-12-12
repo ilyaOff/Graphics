@@ -61,19 +61,31 @@ void init()
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
 		cube_normal);
+	MyModel[0].Position = glm::vec3(0.0f, 2.0f, 2.0f);
+	MyModel[0].Rotation = glm::vec3(0.0f, 60.0f, 0.0f);
+
 
 	MyModel[1].Init(pyramid_vertices, sizeof(pyramid_vertices),
 		pyramid_indices, sizeof(pyramid_indices), GL_TRIANGLES,
 		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
+	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
+	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
+
 
 	MyModel[2].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("PyramidVertex.glsl", "CubeFrag.glsl"));
+	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
+	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 45.0f);
+
 	//пол
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
 		Shader("CubeVertex.glsl", "CubeFrag.glsl"),
 		floor_normals);
+	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
+	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
 
 	Make_sphere(1);
 	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
@@ -81,16 +93,10 @@ void init()
 		Shader("CubeVertex.glsl", "PyramidFrag.glsl"),
 		sphere_normals);
 
-	MyModel[0].Position = glm::vec3(0.0f, 2.0f, 2.0f);
-	MyModel[1].Position = glm::vec3(1.75f, -0.5f, -0.0f);
-	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
-	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
-
-	MyModel[0].Rotation = glm::vec3(0.0f, 60.0f, 0.0f);
-	MyModel[1].Rotation = glm::vec3(0.0f, -10.0f, 0.0f);
-	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 45.0f);
-	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	
+	
+	
 }
 
 glm::mat4x4 proj;

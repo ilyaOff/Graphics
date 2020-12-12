@@ -1,7 +1,7 @@
 #version 330 core
 
 
-uniform vec3 kLight = vec3(0.0,0.0,1.0);
+uniform vec3 kLight = vec3(1.0,1.0,1.0);
 
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
@@ -65,6 +65,6 @@ void main(void) {
 	vec4 mat =  vec4(Vertex + vec3(0.5,0.5,0.5),0);
 	//color = vec4(normal + vec3(0.5,0.5,0.5), 1);
 	color = FongLight(LightColor,normalize(lightDirection),MaterialDiffuse,	
-						LightColorAmbient, mat/*MaterialAmbient*/,
+						LightColorAmbient, MaterialAmbient,
 						LightColor, normalize(r), normalize(e), MaterialSurface);
 }

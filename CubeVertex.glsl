@@ -1,5 +1,5 @@
 #version 330 core
-
+//‘онг, бесконечно удаленный источник
 
 uniform mat4 mvp;
 uniform mat4 m;
@@ -22,24 +22,16 @@ out vec3 lightDirection;
 
 void main() {
 	Vertex = modelPos;	
-	vec4 light = CameraRotation * vec4(LightDir, 1);//!!!
-	lightDirection = light.xyz / light.w;//!!
-		
-	vec4 pos =	 m * vec4(modelPos, 1) ;	
-	//e = pos.xyz / pos.w ;//подвижный блик	
-	//e = vec3(CameraRotation* pos);// круглый блик !!!//темнее
-	//e = vec3(pos) - Vec;//светлее !!!!!!!!!!!!!!!!!!!!оставьть эту
 
+	vec4 light = CameraRotation * vec4(LightDir, 1);//!!!
+	lightDirection = normalize(light.xyz / light.w);//!!
+		
 	normal = normalize(nm * modelNormal);
-	//normal = normalize(mat3(m)* modelPos);
 	
-	pos = CameraRotation*CameraPosition*pos;
-	e = pos.xyz/pos.z;
-	//light = CameraRotation * CameraPosition* vec4(LightDir, 1);
-	//lightDirection  = normalize(light.xyz/light.w - (pos.xyz / pos.w));
+	vec4 pos = CameraRotation*CameraPosition* m * vec4(modelPos, 1);	
+	e = normalize(pos.xyz/pos.z);
 	
-	//r =  2*dot(LightDir, normal)-LightDir;
-	//r = (2*dot(lightDirection, normal)*normal-lightDirection);//!!
-	r = reflect(-lightDirection,normal );
+	r = normalize(reflect(-lightDirection,normal ));
+
 	gl_Position = mvp * vec4(modelPos, 1.0);
 }
