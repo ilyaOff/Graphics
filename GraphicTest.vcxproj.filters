@@ -58,5 +58,11 @@
     <None Include="PyramidFrag.glsl">
       <Filter>Исходные файлы</Filter>
     </None>
+    <None Include="CookTorranceVertex.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="CookTorranceFrag.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
   </ItemGroup>
 </Project>

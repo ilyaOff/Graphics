@@ -176,6 +176,8 @@
     <ClInclude Include="Sphereh.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="CookTorranceFrag.glsl" />
+    <None Include="CookTorranceVertex.glsl" />
     <None Include="CubeFrag.glsl" />
     <None Include="CubeVertex.glsl" />
     <None Include="PyramidFrag.glsl" />

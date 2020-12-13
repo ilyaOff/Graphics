@@ -99,7 +99,7 @@ void init()
 	Make_sphere(1);
 	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
 		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
-		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
+		Shader("CookTorranceVertex.glsl", "CookTorranceFrag.glsl"),
 		sphere_normals);
 
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
