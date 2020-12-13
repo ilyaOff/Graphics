@@ -73,7 +73,84 @@ public:
         glDeleteShader(vertex);
         glDeleteShader(fragment);
     }
+    Shader(const char* vertexPath, const char* geometryPath, const char* fragmentPath )
+    {
+        // Этап №1: Получение исходного кода вершинного/фрагментного шейдера из переменной filePath
+        std::string vertexCode;
+        std::string geometryCode;
+        std::string fragmentCode;
+        std::ifstream vShaderFile;
+        std::ifstream gShaderFile;
+        std::ifstream fShaderFile;
 
+        // Убеждаемся, что объекты ifstream могут выбросить исключение
+        vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        try
+        {
+            // Открываем файлы
+            vShaderFile.open(vertexPath);
+            gShaderFile.open(vertexPath);
+            fShaderFile.open(fragmentPath);
+            std::stringstream vShaderStream, gShaderStream, fShaderStream;
+
+            // Считываем содержимое файловых буферов в потоки 
+            vShaderStream << vShaderFile.rdbuf();
+            gShaderStream << gShaderFile.rdbuf();
+            fShaderStream << fShaderFile.rdbuf();
+
+            // Закрываем файлы
+            vShaderFile.close();
+            gShaderFile.close();
+            fShaderFile.close();
+
+            // Конвертируем данные из потока в строковые переменные
+            vertexCode = vShaderStream.str();
+            geometryCode = gShaderStream.str();
+            fragmentCode = fShaderStream.str();
+        }
+        catch (std::ifstream::failure & e)
+        {
+            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        }
+        const char* vShaderCode = vertexCode.c_str();
+        const char* gShaderCode = geometryCode.c_str();
+        const char* fShaderCode = fragmentCode.c_str();
+
+        // Этап №2: Компилируем шейдеры
+        unsigned int vertex, geometry, fragment;
+
+        // Вершинный шейдер
+        vertex = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex, 1, &vShaderCode, NULL);
+        glCompileShader(vertex);
+        checkCompileErrors(vertex, "VERTEX");
+
+        geometry = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(geometry, 1, &gShaderCode, NULL);
+        glCompileShader(geometry);
+        checkCompileErrors(geometry, "GEOMETRY");
+
+        // Фрагментный шейдер
+        fragment = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment, 1, &fShaderCode, NULL);
+        glCompileShader(fragment);
+        checkCompileErrors(fragment, "FRAGMENT");
+
+        // Шейдерная программа
+        ID = glCreateProgram();
+        glAttachShader(ID, vertex);
+        glAttachShader(ID, geometry);
+        glAttachShader(ID, fragment);
+        glLinkProgram(ID);
+        checkCompileErrors(ID, "PROGRAM");
+
+        // После того, как мы связали шейдеры с нашей программой, удаляем их, так как они нам больше не нужны
+        glDeleteShader(vertex);
+        glDeleteShader(geometry);
+        glDeleteShader(fragment);
+    }
     
     // Активация шейдера
     void use()

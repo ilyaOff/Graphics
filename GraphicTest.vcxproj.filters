@@ -44,6 +44,9 @@
     <ClInclude Include="Cat.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="MakePoints.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertex.glsl">
@@ -64,5 +67,16 @@
     <None Include="CookTorranceFrag.glsl">
       <Filter>Исходные файлы</Filter>
     </None>
+    <None Include="TextureFongFrag.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="TextureFongVertex.glsl">
+      <Filter>Исходные файлы</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Metall1.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

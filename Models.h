@@ -10,11 +10,23 @@ struct Vertex
 };
 #pragma pack()
 
+#pragma pack(1)
+struct VertexText
+{
+	//float x, y, z;
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 texcoords;
+};
+#pragma pack()
+
 #include "Cube1.h"
 #include "Pyramid.h"
 #include "Floor.h"
 #include "Sphereh.h"
 #include "Shader.h"
+
+
 #define PI 3.14159265359
 
 
@@ -51,8 +63,8 @@ public:
 	/*Model(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
 		const char* vertexPath, const char* fragmentPath);*/
-	~Model();
-	Model(const Model& a);//А есть ли смысл в копировании?
+	//~Model();
+	//Model(const Model& a);
 	void glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos = NULL, glm::vec3* CameraRot = NULL);
 	
 	
@@ -60,6 +72,11 @@ public:
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
 		Shader sh, GLfloat* normals = NULL);
 
+	void InitText(GLfloat* vertices, GLuint size_vertices,
+		GLuint* ver_indices, GLuint size_indices, 
+		GLenum modeDraw,Shader sh,
+		GLfloat* normals,
+		const char* texture, GLfloat* text_coord);
 	void Use() { glUseProgram(program); }
 	void UseMaterial(GLfloat* DiffuseMaterial);
 
@@ -303,6 +320,115 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 
 }
 
+
+void Model::InitText(GLfloat* vertices, GLuint size_vertices,
+	GLuint* ver_indices, GLuint size_indices, 
+	GLenum modeDraw, Shader sh,
+	GLfloat* normals, 
+	const char* texture, GLfloat* text_coord)
+{
+	Position = glm::vec3(0.0f, 0.0f, -4.0f);
+	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	this->modeDraw = modeDraw;
+
+	program = sh.ID;
+
+	mvpLoc = glGetUniformLocation(program, "mvp");
+	mLoc = glGetUniformLocation(program, "m");
+	nmLoc = glGetUniformLocation(program, "nm");
+	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
+	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
+	VectorLoc = glGetUniformLocation(program, "Vec");
+	LightLoc = glGetUniformLocation(program, "LightDir");
+
+	std::cout << "MOdelText ID=" << program << std::endl;
+	//-----------------------------------------------//
+	// Загрузка текстуры
+	
+	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(texture, 0);
+	FIBITMAP* image = FreeImage_Load(format, texture);
+	FIBITMAP* temp = image;
+	image = FreeImage_ConvertTo32Bits(image);
+	FreeImage_Unload(temp);
+
+	int w = FreeImage_GetWidth(image);
+	int h = FreeImage_GetHeight(image);
+
+	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
+
+	//Генерация the OpenGL текстурного обЪекта 
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	FreeImage_Unload(image);
+	//-----------------------------------------------//
+	
+	//создание массива вершин
+
+	VertexText* points = new VertexText[size_vertices];
+	for (GLuint i = 0; i < size_vertices / 3; i++)
+	{
+		points[i].position = glm::vec3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+	}
+	//if (normals != NULL)
+	{
+		for (GLuint i = 0; i < size_vertices / 3; i++)
+		{
+			points[i].normal = glm::vec3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
+		}
+	}
+	for (GLuint i = 0; i < size_vertices / 3; i++)
+	{
+		points[i].texcoords = glm::vec2(text_coord[i * 3], text_coord[i * 3 + 1]);
+	}
+	//-----------------------------------------------//
+	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
+	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
+	glGenBuffers(1, &indexArray);
+
+	//указываем в буффере данных, что байты образуют вершины
+	glBindVertexArray(vertexArray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
+	//загружаем данные в буффер
+	glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*points), points, GL_STATIC_DRAW);
+
+
+	sizeIndex = size_indices;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &ver_indices[0], GL_STATIC_DRAW);
+
+
+	//смещение = 0, размер 3 float, не нужно нормализовывать, 
+	//лежат один за другим, // неверно для больше 1 атрибута
+	//лежат в текущем буфере(последний 0)
+	int tmpLoc = glGetAttribLocation(program, "modelPos");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), 0);
+	glEnableVertexAttribArray(tmpLoc);//номер атрибута 
+
+	tmpLoc = glGetAttribLocation(program, "modelNormal");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	tmpLoc = glGetAttribLocation(program, "modelTexCoor");
+	glVertexAttribPointer(tmpLoc, 2, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	glBindVertexArray(0);
+
+}
+	
+/*void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
+	GLuint* ver_indices, GLuint size_indices,
+	GLenum modeDraw, Shader sh,
+	GLfloat* normals,
+	const char* texture, GLfloat* text_coord)
+*/
 void Model::UseMaterial(GLfloat* DiffuseMaterial)
 {
 	this->Use();
@@ -311,38 +437,7 @@ void Model::UseMaterial(GLfloat* DiffuseMaterial)
 }
 
 
-Model::~Model()
-{
-	//if (points != NULL)
-	{
-	//	delete[] points;
-	}
-}
 
-//А есть ли смысл в копировании?
-/*
-Model::Model(const Model& a)
-{
-	
-	vertexBuffer = a.vertexBuffer;
-	vertexArray = a.vertexArray;
-	indexArray = a.indexArray;
 
-	Position = a.Position;
-	Rotation = a.Rotation;
-	program = a.program;
-	mvpLoc = a.mvpLoc;
-	nmLoc = a.nmLoc;
-	mvLoc = a.mvLoc;
-	LightLoc = a.LightLoc;
 
-	if (points != NULL)
-		delete[] points;
-	int size = sizeof(a.points);
-	points = new Vertex[size];
-	for (int i = 0; i < size; i++)
-	{
-		points[i] = a.points[i];
-	}
-}*/
 

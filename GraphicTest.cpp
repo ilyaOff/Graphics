@@ -7,6 +7,9 @@
 #include <gtc/quaternion.hpp> 
 #include <gtx/quaternion.hpp>
 
+#include<FreeImage.h>
+
+
 #include<iostream>
 #include<fstream>
 #include<string>
@@ -29,7 +32,8 @@ using namespace std;
 
 #include "Models.h"
 #include "Shader.h"
-const int N = 5;//количество моделей
+#include "MakePoints.h"
+const int N = 6;//количество моделей
 Model MyModel[N];
 
 float Fov = 45;
@@ -67,7 +71,7 @@ void init()
 	//куб - зеркало камеры
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
-		Shader("PyramidVertex.glsl", "CubeFrag.glsl"),
+		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
 		cube_normal);
 	MyModel[0].Position = glm::vec3(0.0f, 2.0f, 2.0f);
 	MyModel[0].Rotation = glm::vec3(0.0f, 60.0f, 0.0f);
@@ -95,7 +99,7 @@ void init()
 	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	MyModel[3].UseMaterial(&(glm::vec4(0,0,0.5f,0.5f))[0]);
 	
-
+	//золотая сфера
 	Make_sphere(1);
 	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
 		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
@@ -104,7 +108,15 @@ void init()
 
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
 	
-	
+	//Куб с текстурой
+	MyModel[5].InitText(cube_vertices, sizeof(cube_vertices),
+		cube_indices, sizeof(cube_indices), GL_QUADS,
+		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"),
+		cube_normal,
+		"Metall1.jpg",cube_text);
+
+	MyModel[5].Position = glm::vec3(-1.0f, 0.5f, -2.5f);
+	MyModel[5].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 }
 
