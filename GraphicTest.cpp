@@ -146,7 +146,7 @@ void display(void)
 	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
 	glEnable(GL_LIGHTING);//????????????????
 	//-------------------------------------------------//
-	/*
+	
 	glEnable(GL_STENCIL_TEST);//Буфер трафарета
 	glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);//Настройки теста буфера трафарета
 	
@@ -201,12 +201,12 @@ void display(void)
 	}
 
 	glDisable(GL_STENCIL_TEST);
-	*/
+	
 	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
 	//-------------------------------------------------//
 	for (int i = 0; i < N; i++)
 	{
-		//if(i != 3)
+		if(i != 3)
 		MyModel[i].glDrawModel(&proj,&(LightDirection), &CameraPosition, &CameraRotation);
 	}
 	//MyModel[3].Position += glm::vec3(0, -0.001f, 0);
