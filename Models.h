@@ -25,13 +25,11 @@ struct VertexText
 #include "Floor.h"
 #include "Sphereh.h"
 #include "Shader.h"
+//#include "Cat.h"
 
-#include "MakePoints.h"
+//#include "MakePoints.h"
 
 #define PI 3.14159265359
-
-
-
 
 
 
@@ -429,12 +427,25 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	glBindVertexArray(0);
 
 }
-	
+
+void Model::UseMaterial(GLfloat* DiffuseMaterial)
+{
+	this->Use();
+	GLuint Param = glGetUniformLocation(program, "MaterialDiffuse");
+	glUniform4fv(Param, 1, DiffuseMaterial);
+}
+
+
+
+
+
+
+/*
 void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
-		GLuint* ver_indices, GLuint size_indices,
-		GLenum modeDraw, Shader sh, const char* texture,
-		GLfloat* normals, GLuint normal_size,
-		GLfloat* text_coord, GLuint text_size)
+	GLuint* ver_indices, GLuint size_indices,
+	GLenum modeDraw, Shader sh, const char* texture,
+	GLfloat* normals, GLuint normal_size,
+	GLfloat* text_coord, GLuint text_size)
 {
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
 	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -465,7 +476,7 @@ void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
 
 	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
 
-	//Генерация the OpenGL текстурного обЪекта 
+	//Генерация the OpenGL текстурного обЪекта
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -478,18 +489,18 @@ void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
 	//-----------------------------------------------//
 
 	//создание массива вершин
-	
-		
-		
-	int* index_res;
-		
+
+
+	GLuint size, size_index;
+	int* index_res = NULL;
 	VertexText* points = NULL;
 	MakeVertex_obj(vertices, size_vertices,
-		normals,  normal_size,
-		text_coord,  text_size,
+		normals, normal_size,
+		text_coord, text_size,
 		ver_indices, size_indices,
-		&points, &index_res);
-
+		&points, &index_res,
+		&size, &size_index);
+	// size = ;
 	//-----------------------------------------------//
 	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
 	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
@@ -500,20 +511,18 @@ void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
 	//загружаем данные в буффер
-	glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*points), points, GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, size * sizeof(*points), points, GL_STATIC_DRAW);
 
 	sizeIndex = size_indices;
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &ver_indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_index, &index_res[0], GL_STATIC_DRAW);
 
-
-	//смещение = 0, размер 3 float, не нужно нормализовывать, 
+	//смещение = 0, размер 3 float, не нужно нормализовывать,
 	//лежат один за другим, // неверно для больше 1 атрибута
 	//лежат в текущем буфере(последний 0)
 	int tmpLoc = glGetAttribLocation(program, "modelPos");
 	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), 0);
-	glEnableVertexAttribArray(tmpLoc);//номер атрибута 
+	glEnableVertexAttribArray(tmpLoc);//номер атрибута
 
 	tmpLoc = glGetAttribLocation(program, "modelNormal");
 	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(3 * sizeof(GLfloat)));
@@ -524,18 +533,10 @@ void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
 	glEnableVertexAttribArray(tmpLoc);
 
 	glBindVertexArray(0);
+	if (index_res != NULL)
+		delete[] index_res;
+	if (points != NULL)
+		delete[] points;
 
-}
-
-void Model::UseMaterial(GLfloat* DiffuseMaterial)
-{
-	this->Use();
-	GLuint Param = glGetUniformLocation(program, "MaterialDiffuse");
-	glUniform4fv(Param, 1, DiffuseMaterial);
-}
-
-
-
-
-
-
+};
+*/

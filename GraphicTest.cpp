@@ -32,7 +32,7 @@ using namespace std;
 
 #include "Models.h"
 #include "Shader.h"
-const int N = 6;//количество моделей
+const int N = 7;//количество моделей
 Model MyModel[N];
 
 float Fov = 45;
@@ -116,6 +116,7 @@ void init()
 
 	MyModel[5].Position = glm::vec3(-1.0f, 0.5f, -2.5f);
 	MyModel[5].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	
 }
 
