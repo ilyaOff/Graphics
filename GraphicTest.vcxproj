@@ -169,6 +169,7 @@
     <ClInclude Include="Cat.h" />
     <ClInclude Include="Cube1.h" />
     <ClInclude Include="Floor.h" />
+    <ClInclude Include="FragNormalMap.glsl" />
     <ClInclude Include="MakePoints.h" />
     <ClInclude Include="Models.h" />
     <ClInclude Include="MyLib\glut-3.7\include\GL\glut.h" />
@@ -188,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Metall1.jpg" />
+    <Image Include="NormalMap.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -26,7 +26,6 @@ struct VertexText
 #include "Sphereh.h"
 #include "Shader.h"
 //#include "Cat.h"
-
 //#include "MakePoints.h"
 
 #define PI 3.14159265359
@@ -57,6 +56,8 @@ public:
 	GLuint cameraPosLoc;
 	GLuint cameraRotLoc;
 	GLenum modeDraw;
+
+	GLuint textureID;
 
 	Model();
 	/*Model(GLfloat* vertices, GLuint size_vertices,
@@ -92,7 +93,7 @@ private:
 Model::Model()
 {
 	//points = NULL; 
-	
+	textureID = 0;
 	vertexBuffer = 0;
 	vertexArray = 0;;
 	indexArray = 0;;
@@ -228,6 +229,9 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos,
 	//свет	
 	glUniform3fv(LightLoc, 1,&(*Light)[0]);
 
+	glActiveTexture(textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
 }
@@ -362,7 +366,7 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
 
 	//Генерация the OpenGL текстурного обЪекта 
-	GLuint textureID;
+	
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);

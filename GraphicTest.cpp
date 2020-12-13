@@ -15,20 +15,8 @@
 #include<string>
 //#define PI 3.14159265359// в Models.h
 
-//#include<vector>
-//#include<chrono>
-//#include<numeric>
-
 using namespace std;
 
-
-//#include <fre>
-//#include <windows.h>        // Заголовочный файл для Windows// ВАЖНО!!!!
-//#include <gl\gl.h>          // Заголовочный файл для OpenGL32 библиотеки
-//#include <glut.h>           // Заголовочный файл для GLu32 библиотеки
-//#include <gl\glut.h>// у меня так не работает
-
-//#include <gl\glaux.h>                     // Заголовочный файл для GLaux библиотеки
 
 #include "Models.h"
 #include "Shader.h"
@@ -106,6 +94,7 @@ void init()
 		sphere_normals);
 
 	MyModel[4].Position = glm::vec3(0.0f, 1.5f, -1.0f);
+
 	
 	//Куб с текстурой
 	MyModel[5].InitText(cube_vertices, sizeof(cube_vertices),
@@ -116,7 +105,17 @@ void init()
 
 	MyModel[5].Position = glm::vec3(-1.0f, 0.5f, -2.5f);
 	MyModel[5].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
+	
+	//плоскость
+	MyModel[6].InitText(floor_vertices, sizeof(floor_vertices),
+		floor_indices, sizeof(floor_indices), GL_QUADS,
+		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"),
+		floor_normals,
+		"NormalMap.png", floor_text_normal);
+	
+	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -5.0f);
+	MyModel[6].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
+	
 	
 }
 

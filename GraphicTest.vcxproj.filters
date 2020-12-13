@@ -47,6 +47,9 @@
     <ClInclude Include="MakePoints.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="FragNormalMap.glsl">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="CubeVertex.glsl">
@@ -76,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Metall1.jpg">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="NormalMap.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>
