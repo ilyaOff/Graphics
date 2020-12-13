@@ -160,12 +160,13 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos,
 	}
 	if (CameraRot != NULL)
 	{
-		cameraRot = 
+	///	glm::squad()
+		cameraRot = //glm::mat4x4(glm::quat(*CameraRot));
+			
 			glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f)) *
 			 glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
 			* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f));
-			
-			//glm::mat4x4(glm::quat(*CameraRot));
+					
 	}
 	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;
 	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(cameraRot * cameraPos * m)));
