@@ -26,6 +26,7 @@ struct VertexText
 #include "Sphereh.h"
 #include "Shader.h"
 
+#include "MakePoints.h"
 
 #define PI 3.14159265359
 
@@ -77,6 +78,12 @@ public:
 		GLenum modeDraw,Shader sh,
 		GLfloat* normals,
 		const char* texture, GLfloat* text_coord);
+
+	void InitTextObj(GLfloat* vertices, GLuint size_vertices,
+		GLuint* ver_indices, GLuint size_indices,
+		GLenum modeDraw, Shader sh, const char* texture,
+		GLfloat* normals, GLuint normal_size,		
+		GLfloat* text_coord, GLuint text_size );
 	void Use() { glUseProgram(program); }
 	void UseMaterial(GLfloat* DiffuseMaterial);
 
@@ -423,12 +430,103 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 
 }
 	
-/*void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
-	GLuint* ver_indices, GLuint size_indices,
-	GLenum modeDraw, Shader sh,
-	GLfloat* normals,
-	const char* texture, GLfloat* text_coord)
-*/
+void Model::InitTextObj(GLfloat* vertices, GLuint size_vertices,
+		GLuint* ver_indices, GLuint size_indices,
+		GLenum modeDraw, Shader sh, const char* texture,
+		GLfloat* normals, GLuint normal_size,
+		GLfloat* text_coord, GLuint text_size)
+{
+	Position = glm::vec3(0.0f, 0.0f, -4.0f);
+	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	this->modeDraw = modeDraw;
+
+	program = sh.ID;
+
+	mvpLoc = glGetUniformLocation(program, "mvp");
+	mLoc = glGetUniformLocation(program, "m");
+	nmLoc = glGetUniformLocation(program, "nm");
+	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
+	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
+	VectorLoc = glGetUniformLocation(program, "Vec");
+	LightLoc = glGetUniformLocation(program, "LightDir");
+
+	std::cout << "MOdelText ID=" << program << std::endl;
+	//-----------------------------------------------//
+	// Загрузка текстуры
+
+	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(texture, 0);
+	FIBITMAP* image = FreeImage_Load(format, texture);
+	FIBITMAP* temp = image;
+	image = FreeImage_ConvertTo32Bits(image);
+	FreeImage_Unload(temp);
+
+	int w = FreeImage_GetWidth(image);
+	int h = FreeImage_GetHeight(image);
+
+	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
+
+	//Генерация the OpenGL текстурного обЪекта 
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	FreeImage_Unload(image);
+	//-----------------------------------------------//
+
+	//создание массива вершин
+	
+		
+		
+	int* index_res;
+		
+	VertexText* points = NULL;
+	MakeVertex_obj(vertices, size_vertices,
+		normals,  normal_size,
+		text_coord,  text_size,
+		ver_indices, size_indices,
+		&points, &index_res);
+
+	//-----------------------------------------------//
+	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
+	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
+	glGenBuffers(1, &indexArray);
+
+	//указываем в буффере данных, что байты образуют вершины
+	glBindVertexArray(vertexArray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
+	//загружаем данные в буффер
+	glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*points), points, GL_STATIC_DRAW);
+
+
+	sizeIndex = size_indices;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size_indices, &ver_indices[0], GL_STATIC_DRAW);
+
+
+	//смещение = 0, размер 3 float, не нужно нормализовывать, 
+	//лежат один за другим, // неверно для больше 1 атрибута
+	//лежат в текущем буфере(последний 0)
+	int tmpLoc = glGetAttribLocation(program, "modelPos");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), 0);
+	glEnableVertexAttribArray(tmpLoc);//номер атрибута 
+
+	tmpLoc = glGetAttribLocation(program, "modelNormal");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	tmpLoc = glGetAttribLocation(program, "modelTexCoor");
+	glVertexAttribPointer(tmpLoc, 2, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	glBindVertexArray(0);
+
+}
+
 void Model::UseMaterial(GLfloat* DiffuseMaterial)
 {
 	this->Use();

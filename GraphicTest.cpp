@@ -32,7 +32,6 @@ using namespace std;
 
 #include "Models.h"
 #include "Shader.h"
-#include "MakePoints.h"
 const int N = 6;//количество моделей
 Model MyModel[N];
 
