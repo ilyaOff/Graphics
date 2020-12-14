@@ -65,7 +65,8 @@ public:
 		const char* vertexPath, const char* fragmentPath);*/
 	//~Model();
 	//Model(const Model& a);
-	void glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos = NULL, glm::vec3* CameraRot = NULL);
+	void glDrawModel(glm::mat4* proj, glm::vec3* Light,
+			glm::vec3* CameraPos = NULL, glm::vec3* CameraRot = NULL, glm::vec3* CameraScale = NULL);
 	
 	
 	void Init(GLfloat* vertices, GLuint size_vertices,
@@ -159,7 +160,8 @@ Model::Model()
 	glDrawElements(GL_QUADS, sizeof(cube_indices) / sizeof(cube_indices[0]), GL_UNSIGNED_INT, 0);
 
 }*/
-void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos, glm::vec3* CameraRot)
+void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
+			glm::vec3* CameraPos, glm::vec3* CameraRot, glm::vec3* CameraScale)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
@@ -176,9 +178,11 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos,
 	//	* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4x4 cameraPos = glm::mat4x4(1.0);
 	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
+	
 	if (CameraPos != NULL)
 	{
 		cameraPos = glm::translate(-(*CameraPos));
+		
 	//	cameraPos = (*CameraPos);
 	}
 	if (CameraRot != NULL)
@@ -189,6 +193,11 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light, glm::vec3* CameraPos,
 			glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f)) *
 			 glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
 			* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f));
+
+		if (CameraScale != NULL)
+		{
+			cameraRot = glm::scale((*CameraScale)) * cameraRot;
+		}
 					
 	}
 	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;

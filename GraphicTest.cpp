@@ -179,7 +179,9 @@ void display(void)
 
 	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно
 	CamZerRot = CameraRotation - MyModel[3].Rotation;
-	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, CamZerRot.z);
+	//CamZerRot = glm::vec3(-CamZerRot.x, -CamZerRot.y, PI - CamZerRot.z);//!!!!!!!!!!
+	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!!!!!!!!!
+
 	
 	glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
 
@@ -197,7 +199,8 @@ void display(void)
 	for (int i = 0; i < N; i++)
 	{		
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj, &(lightRef),&CamZerPos, &CamZerRot);
+		MyModel[i].glDrawModel(&proj, &(lightRef),
+						&CamZerPos, &CamZerRot,&glm::vec3(-1,1,1) );
 	}
 
 	glDisable(GL_STENCIL_TEST);
@@ -207,7 +210,8 @@ void display(void)
 	for (int i = 0; i < N; i++)
 	{
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj,&(LightDirection), &CameraPosition, &CameraRotation);
+		MyModel[i].glDrawModel(&proj,&(LightDirection), 
+			&CameraPosition, &CameraRotation);
 	}
 	//MyModel[3].Position += glm::vec3(0, -0.001f, 0);
 	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
@@ -218,14 +222,14 @@ void display(void)
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
 	glDisable(GL_BLEND);*/
 
-	/*
+	
 	if (SwapCamers)
 	{
 		CameraPosition = CamZerPos;
 		CameraRotation = CamZerRot;
 		SwapCamers = false;
 	}
-	*/
+	
 
 	glutSwapBuffers();
 	glFlush();//передает команды на исполнение
