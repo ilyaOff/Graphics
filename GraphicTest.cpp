@@ -114,7 +114,7 @@ void init()
 		"NormalMap.png", floor_text_normal);
 	
 	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -5.0f);
-	MyModel[6].Rotation = glm::vec3(0*PI/2, 0.0f, 0.0f);
+	MyModel[6].Rotation = glm::vec3(PI/4, 0.0f, 0.0f);
 	
 	
 }
@@ -284,7 +284,7 @@ void idle(void)
 	Time = glutGet(GLUT_ELAPSED_TIME);
 	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
-	MyModel[6].Rotation.y += 3*DeltaTime;
+	//MyModel[6].Rotation.x += 3*DeltaTime;
 	//MyModel[3].Rotation.y += 3*DeltaTime;//зеркало//пока не работает
 }
 
