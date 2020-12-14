@@ -144,7 +144,7 @@ void display(void)
 	//Свет-солнце поворочативается вместе с камерой
 	//glm::vec3 a = glm::vec3(CameraV * Dir);	
 	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
-	glEnable(GL_LIGHTING);//????????????????
+	//glEnable(GL_LIGHTING);//????????????????
 	//-------------------------------------------------//
 	
 	glEnable(GL_STENCIL_TEST);//Буфер трафарета
@@ -152,6 +152,7 @@ void display(void)
 	
 	//glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
+
 	glStencilFunc(GL_ALWAYS, 1, 0xFF);//рисуем  зеркало
 	
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
@@ -162,11 +163,9 @@ void display(void)
 
 
 	//glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);
+	glDepthMask(GL_TRUE);	
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
-	
-
 	
 	glm::mat4x4 ReflectMat = glm::mat4x4(glm::quat(MyModel[3].Rotation))*glm::translate(-MyModel[3].Position);
 		
@@ -175,7 +174,7 @@ void display(void)
 	glm::vec3 CamZerRot;
 	
 	CamZerPos = glm::vec3(ReflectMat * glm::vec4(CameraPosition, 1));
-	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z);
+	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z) + MyModel[3].Position;
 
 	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно
 	
@@ -199,32 +198,46 @@ void display(void)
 */
 	//glDisable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
+	
 	for (int i = 0; i < N; i++)
 	{		
 		if(i != 3)
 		MyModel[i].glDrawModel(&proj, &(lightRef),
 						&CamZerPos, &CamZerRot,&glm::vec3(1,-1,1) );
 	}
-	//glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	//glFrontFace(GL_CW);
+	//glDepthFunc(GL_GREATER);
+	//glDisable(GL_CULL_FACE);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//MyModel[3].Position += glm::vec3(0, 0.001f, 0);
+	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
+	//MyModel[3].Position -= glm::vec3(0, 0.001f, 0);
+	//glDisable(GL_BLEND);
+
+
+	//-------------------------------------------------//
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);
 	
 	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
-	//-------------------------------------------------//
+	
+	
 	for (int i = 0; i < N; i++)
 	{
 		if(i != 3)
 		MyModel[i].glDrawModel(&proj,&(LightDirection), 
 			&CameraPosition, &CameraRotation);
 	}
-	//MyModel[3].Position += glm::vec3(0, -0.001f, 0);
-	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
-	//MyModel[3].Position += glm::vec3(0, 0.001f, 0);
-	/*glDisable(GL_LIGHTING);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	/*
+	MyModel[3].Position += glm::vec3(0, -0.001f, 0);
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
-	glDisable(GL_BLEND);*/
+	MyModel[3].Position += glm::vec3(0, 0.001f, 0);
+	*/
+	//glDisable(GL_LIGHTING);
+	
 
 	
 	if (SwapCamers)
