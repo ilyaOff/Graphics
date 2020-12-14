@@ -109,12 +109,12 @@ void init()
 	//плоскость
 	MyModel[6].InitText(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
-		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"),
+		Shader("TextureFongVertex.glsl", "FragNormalMap.glsl"),
 		floor_normals,
 		"NormalMap.png", floor_text_normal);
 	
 	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -5.0f);
-	MyModel[6].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
+	MyModel[6].Rotation = glm::vec3(0*PI/2, 0.0f, 0.0f);
 	
 	
 }
@@ -137,7 +137,8 @@ void display(void)
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
 	*/	
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);\
+	//glm::mat4x4 
 	glm::mat4x4 CameraRot = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f))
@@ -173,7 +174,7 @@ void display(void)
 
 	glm::vec3 CamZerPos;
 	glm::vec3 CamZerRot;
-	
+
 	CamZerPos = glm::vec3(ReflectMat * glm::vec4(CameraPosition, 1));
 	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z);// +MyModel[3].Position;
 
@@ -186,15 +187,19 @@ void display(void)
 		glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f))
 		*/
-
+	/*
 	glm::quat a = glm::quat(glm::rotate(CameraPosition.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraPosition.x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate(CameraPosition.y, glm::vec3(0.0f, 1.0f, 0.0f))
-			);
+		* glm::rotate(CameraPosition.y, glm::vec3(0.0f, 1.0f, 0.0f)));
+	glm::quat b = glm::quat(MyModel[3].Rotation);
+	
+	*/
+	
+	
+	
 	CamZerRot = CameraRotation;// -MyModel[3].Rotation;
 	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
-
 	
 	glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
 
@@ -211,6 +216,7 @@ void display(void)
 	//glDisable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glm::mat4x4 CameraVReflect = glm::scale(glm::vec3(1, -1, 1))
+				//*glm::mat4x4(a)
 				* glm::rotate(CamZerRot.z, glm::vec3(0.0f, 0.0f, 1.0f))
 				* glm::rotate(CamZerRot.x, glm::vec3(1.0f, 0.0f, 0.0f))
 				* glm::rotate(CamZerRot.y, glm::vec3(0.0f, 1.0f, 0.0f))
@@ -278,6 +284,7 @@ void idle(void)
 	Time = glutGet(GLUT_ELAPSED_TIME);
 	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
+	MyModel[6].Rotation.y += 3*DeltaTime;
 	//MyModel[3].Rotation.y += 3*DeltaTime;//зеркало//пока не работает
 }
 

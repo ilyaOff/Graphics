@@ -5,7 +5,7 @@ uniform vec3 kLight = vec3(1.0,1.0,1.0);
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
 uniform vec4 LightColor = vec4(1,1,1,1.0);
-
+uniform mat3 nm;
 uniform float PowerGlare = 32.0f;
 
 uniform vec4 MaterialAmbient = vec4(0.2,0.2,0.2,1.0);
@@ -64,7 +64,8 @@ void main(void) {
 	
 	//vec4 mat = texture2D(Map, textCoor.xy);
 	vec3 n =  (texture2D(Map, textCoor.xy).rgb - vec3(0.5f,0.5f,0.5f))*2;
-	vec3 reflect = normalize(reflect(-lightDirection,n));
+	n = normalize(n);
+	vec3 reflect = normalize(reflect(lightDirection,n));
 
 	color = FongLight(LightColor,normalize(lightDirection),MaterialDiffuse,	
 						LightColorAmbient, MaterialAmbient, n,

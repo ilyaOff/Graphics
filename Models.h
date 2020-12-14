@@ -392,14 +392,14 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	}
 	//if (normals != NULL)
 	{
-		for (GLuint i = 0; i < size_vertices / 3; i++)
+		for (GLuint i = 0; 3*i < size_vertices ; i++)
 		{
 			points[i].normal = glm::vec3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
 		}
 	}
-	for (GLuint i = 0; i < size_vertices / 3; i++)
+	for (GLuint i = 0; 3*i < size_vertices ; i++)
 	{
-		points[i].texcoords = glm::vec2(text_coord[i * 3], text_coord[i * 3 + 1]);
+		points[i].texcoords = glm::vec2(text_coord[i * 2], text_coord[i * 2 + 1]);
 	}
 	//-----------------------------------------------//
 	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
