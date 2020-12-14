@@ -138,6 +138,11 @@ void display(void)
 	*/	
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glm::mat4x4 CameraRot = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
+		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f))
+		* glm::translate(-CameraPosition);
+
 	//glm::mat4x4 CameraRot= glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 //		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 	//	* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -152,34 +157,41 @@ void display(void)
 	
 	//glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
-
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);//рисуем  зеркало
-	
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);//рисуем  зеркало	
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
 
-	MyModel[3].glDrawModel(&proj, &(LightDirection),&(CameraPosition), &CameraRotation);//зеркало
+	MyModel[3].glDrawModel(&proj, &(LightDirection),&CameraRot);//зеркало
 	
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
-
 	//glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);	
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
 	
-	glm::mat4x4 ReflectMat = glm::mat4x4(glm::quat(MyModel[3].Rotation))*glm::translate(-MyModel[3].Position);
-		
-	
+	glm::mat4x4 ReflectMat = glm::translate(-MyModel[3].Position)
+			*glm::mat4x4(glm::quat(-MyModel[3].Rotation));
+
 	glm::vec3 CamZerPos;
 	glm::vec3 CamZerRot;
 	
 	CamZerPos = glm::vec3(ReflectMat * glm::vec4(CameraPosition, 1));
-	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z) + MyModel[3].Position;
+	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z);// +MyModel[3].Position;
 
-	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно
+	CamZerPos = glm::vec3(glm::inverse(ReflectMat) * glm::vec4(CamZerPos, 1));
 	
+	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно	
 	//Будет ошибка, так как не работаю с кватернионами
-	CamZerRot = CameraRotation - MyModel[3].Rotation;	
+	/*
+	glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f))*
+		glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f))
+		*/
+
+	glm::quat a = glm::quat(glm::rotate(CameraPosition.z, glm::vec3(0.0f, 0.0f, 1.0f))
+		* glm::rotate(CameraPosition.x, glm::vec3(1.0f, 0.0f, 0.0f))
+		* glm::rotate(CameraPosition.y, glm::vec3(0.0f, 1.0f, 0.0f))
+			);
+	CamZerRot = CameraRotation;// -MyModel[3].Rotation;
 	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
 
@@ -198,12 +210,15 @@ void display(void)
 */
 	//glDisable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
-	
-	for (int i = 0; i < N; i++)
+	glm::mat4x4 CameraVReflect = glm::scale(glm::vec3(1, -1, 1))
+				* glm::rotate(CamZerRot.z, glm::vec3(0.0f, 0.0f, 1.0f))
+				* glm::rotate(CamZerRot.x, glm::vec3(1.0f, 0.0f, 0.0f))
+				* glm::rotate(CamZerRot.y, glm::vec3(0.0f, 1.0f, 0.0f))
+				* glm::translate(-CamZerPos);
+	for(int i = 0; i < N; i++)
 	{		
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj, &(lightRef),
-						&CamZerPos, &CamZerRot,&glm::vec3(1,-1,1) );
+		MyModel[i].glDrawModel(&proj, &(lightRef),	&CameraVReflect);
 	}
 	//glFrontFace(GL_CW);
 	//glDepthFunc(GL_GREATER);
@@ -224,12 +239,10 @@ void display(void)
 	
 	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
 	
-	
 	for (int i = 0; i < N; i++)
 	{
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj,&(LightDirection), 
-			&CameraPosition, &CameraRotation);
+		MyModel[i].glDrawModel(&proj,&(LightDirection),	&CameraRot);
 	}
 	/*
 	MyModel[3].Position += glm::vec3(0, -0.001f, 0);
@@ -239,7 +252,6 @@ void display(void)
 	//glDisable(GL_LIGHTING);
 	
 
-	
 	if (SwapCamers)
 	{
 		CameraPosition = CamZerPos;

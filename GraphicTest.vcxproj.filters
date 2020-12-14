@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\Шейдеры">
+      <UniqueIdentifier>{9e682a04-09bd-420c-a8e5-82f37a93c70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Шейдеры\Вершинные">
+      <UniqueIdentifier>{4427dcad-80b4-4f25-91d8-9c66d055c586}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphicTest.cpp">
@@ -48,33 +54,33 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="FragNormalMap.glsl">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Шейдеры</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="CubeVertex.glsl">
-      <Filter>Исходные файлы</Filter>
+    <None Include="CookTorranceFrag.glsl">
+      <Filter>Исходные файлы\Шейдеры</Filter>
     </None>
     <None Include="CubeFrag.glsl">
-      <Filter>Исходные файлы</Filter>
-    </None>
-    <None Include="PyramidVertex.glsl">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Шейдеры</Filter>
     </None>
     <None Include="PyramidFrag.glsl">
-      <Filter>Исходные файлы</Filter>
-    </None>
-    <None Include="CookTorranceVertex.glsl">
-      <Filter>Исходные файлы</Filter>
-    </None>
-    <None Include="CookTorranceFrag.glsl">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Шейдеры</Filter>
     </None>
     <None Include="TextureFongFrag.glsl">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Шейдеры</Filter>
+    </None>
+    <None Include="CookTorranceVertex.glsl">
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
+    </None>
+    <None Include="CubeVertex.glsl">
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
+    </None>
+    <None Include="PyramidVertex.glsl">
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
     </None>
     <None Include="TextureFongVertex.glsl">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

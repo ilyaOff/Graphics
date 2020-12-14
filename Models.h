@@ -50,10 +50,9 @@ public:
 	GLuint program;
 	GLuint mvpLoc;	
 	GLuint mLoc;
-	GLuint nmLoc;
-	GLuint VectorLoc;
+	GLuint nmLoc;	
 	GLuint LightLoc;
-	GLuint cameraPosLoc;
+	GLuint CameraVLoc;
 	GLuint cameraRotLoc;
 	GLenum modeDraw;
 
@@ -66,8 +65,7 @@ public:
 	//~Model();
 	//Model(const Model& a);
 	void glDrawModel(glm::mat4* proj, glm::vec3* Light,
-			glm::vec3* CameraPos = NULL, glm::vec3* CameraRot = NULL, glm::vec3* CameraScale = NULL);
-	
+		glm::mat4* CameraV, glm::mat4* CameraRot = NULL);
 	
 	void Init(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
@@ -108,8 +106,7 @@ Model::Model()
 	mvpLoc = 0;
 	nmLoc = 0;
 	mLoc = 0;
-	LightLoc = 0;
-	cameraPosLoc = 0;
+	LightLoc = 0;	
 	cameraRotLoc = 0;
 }
 /*Model::Model(GLfloat* vertices,  GLuint size_vertices,
@@ -161,13 +158,13 @@ Model::Model()
 
 }*/
 void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
-			glm::vec3* CameraPos, glm::vec3* CameraRot, glm::vec3* CameraScale)
+			glm::mat4* CameraV, glm::mat4* CameraRot)
+			//glm::vec3* CameraPos, glm::vec3* CameraRot, glm::vec3* CameraScale)
 {
 	glUseProgram(program);
 	glBindVertexArray(vertexArray);
 	
 	//положение в пространстве
-	//glm::quat a = glm::quat(2);
 	
 	glm::quat a = glm::quat(Rotation);
 	
@@ -176,8 +173,9 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 	//	* glm::rotate(Rotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 	//	* glm::rotate(Rotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 	//	* glm::rotate(Rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	/*
 	glm::mat4x4 cameraPos = glm::mat4x4(1.0);
-	glm::mat4x4 cameraRot = glm::mat4x4(1.0);
+	
 	
 	if (CameraPos != NULL)
 	{
@@ -199,10 +197,11 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 			cameraRot = glm::scale((*CameraScale)) * cameraRot;
 		}
 					
-	}
-	glm::mat4x4 mvp = (*proj) * cameraRot * cameraPos * m;
-	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(cameraRot * cameraPos * m)));
-	//glm::mat3x3 nm = glm::mat3x3(mv);
+	}*/
+	
+	glm::mat4x4 mvp = (*proj) * *CameraV * m;
+	glm::mat3x3 nm = glm::transpose(glm::inverse(glm::mat3x3(*CameraV * m)));
+	
 	/*
 	cout << "nm " << program << endl;
 	glm::vec3 rrr = (nm * glm::vec3(0.5f, 0.5f, 0.5f));
@@ -230,11 +229,14 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 	//дл€ шейдеров
 	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определ€ем матрицу дл€ шейдера ћодельно-¬идова€-—проецированна€
 	glUniformMatrix4fv(mLoc, 1, GL_FALSE, &m[0][0]);//определ€ем матрицу 	ћодельна€
-	glUniformMatrix4fv(cameraPosLoc, 1, GL_FALSE, &cameraPos[0][0]);
-	glUniformMatrix4fv(cameraRotLoc, 1, GL_FALSE, &cameraRot[0][0]);
-	glUniform3fv(VectorLoc, 1, &(*CameraPos)[0]);
+	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу преобразовани€ нормалей
 
-	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определ€ем матрицу 	?
+	glUniformMatrix4fv(CameraVLoc, 1, GL_FALSE, &(*CameraV)[0][0]);
+	if (CameraRot != NULL)
+	{
+		glUniformMatrix4fv(cameraRotLoc, 1, GL_FALSE, &(*CameraRot)[0][0]);
+	}	
+
 	//свет	
 	glUniform3fv(LightLoc, 1,&(*Light)[0]);
 
@@ -256,13 +258,9 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	mvpLoc = glGetUniformLocation(program, "mvp");
 	mLoc = glGetUniformLocation(program, "m");
 	nmLoc = glGetUniformLocation(program, "nm");
-	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
-	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
-	VectorLoc = glGetUniformLocation(program, "Vec");
-
-
-	//LightLoc = glGetUniformLocation(program, "LightPos");
-	LightLoc = glGetUniformLocation(program, "LightDir");
+	CameraVLoc = glGetUniformLocation(program, "CameraV");
+	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");	
+	LightLoc = glGetUniformLocation(program, "LightPos");
 	std::cout << "MOdel ID=" << program << std::endl;
 	//-----------------------------------------------//
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
@@ -354,10 +352,9 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	mvpLoc = glGetUniformLocation(program, "mvp");
 	mLoc = glGetUniformLocation(program, "m");
 	nmLoc = glGetUniformLocation(program, "nm");
-	cameraPosLoc = glGetUniformLocation(program, "CameraPosition");
+	CameraVLoc = glGetUniformLocation(program, "CameraV");
 	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
-	VectorLoc = glGetUniformLocation(program, "Vec");
-	LightLoc = glGetUniformLocation(program, "LightDir");
+	LightLoc = glGetUniformLocation(program, "LightPos");
 
 	std::cout << "MOdelText ID=" << program << std::endl;
 	//-----------------------------------------------//

@@ -1,6 +1,6 @@
 #version 330 core
 //‘онг, бесконечно удаленный источник
-
+//не исправлен
 uniform mat4 mvp;
 uniform mat4 m;
 uniform mat4 CameraPosition;
