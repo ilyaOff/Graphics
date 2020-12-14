@@ -178,14 +178,14 @@ void display(void)
 	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z);
 
 	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно
-	CamZerRot = CameraRotation - MyModel[3].Rotation;
-	//CamZerRot = glm::vec3(-CamZerRot.x, -CamZerRot.y, PI - CamZerRot.z);//!!!!!!!!!!
-	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!!!!!!!!!
+	CamZerRot = CameraRotation - MyModel[3].Rotation;	
+	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
+	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
 
 	
 	glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
 
-	
+	/*
 	std::cout << "CAM " <<
 		CameraPosition.x << ' ' << CameraPosition.y << ' ' << CameraPosition.z << endl 
 		<< CameraRotation.x << ' ' << CameraRotation.y << ' ' << CameraRotation.z << endl;
@@ -194,15 +194,15 @@ void display(void)
 	std::cout << "RCAM " <<
 		CamZerPos.x << ' ' << CamZerPos.y << ' ' << CamZerPos.z << endl << endl
 		<< CamZerRot.x << ' ' << CamZerRot.y << ' ' << CamZerRot.z << endl;;
-
-
+*/
+	glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	for (int i = 0; i < N; i++)
 	{		
 		if(i != 3)
 		MyModel[i].glDrawModel(&proj, &(lightRef),
-						&CamZerPos, &CamZerRot,&glm::vec3(-1,1,1) );
+						&CamZerPos, &CamZerRot,&glm::vec3(1,-1,1) );
 	}
-
+	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glDisable(GL_STENCIL_TEST);
 	
 	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
