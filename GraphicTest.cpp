@@ -165,7 +165,7 @@ void display(void)
 	glDepthMask(GL_TRUE);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
-
+	
 
 	
 	glm::mat4x4 ReflectMat = glm::mat4x4(glm::quat(MyModel[3].Rotation))*glm::translate(-MyModel[3].Position);
@@ -178,6 +178,8 @@ void display(void)
 	CamZerPos = glm::vec3(CamZerPos.x, -CamZerPos.y, CamZerPos.z);
 
 	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно
+	
+	//Будет ошибка, так как не работаю с кватернионами
 	CamZerRot = CameraRotation - MyModel[3].Rotation;	
 	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
@@ -195,14 +197,16 @@ void display(void)
 		CamZerPos.x << ' ' << CamZerPos.y << ' ' << CamZerPos.z << endl << endl
 		<< CamZerRot.x << ' ' << CamZerRot.y << ' ' << CamZerRot.z << endl;;
 */
-	glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	//glDisable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
 	for (int i = 0; i < N; i++)
 	{		
 		if(i != 3)
 		MyModel[i].glDrawModel(&proj, &(lightRef),
 						&CamZerPos, &CamZerRot,&glm::vec3(1,-1,1) );
 	}
-	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	//glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);
 	
 	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
@@ -249,7 +253,7 @@ void idle(void)
 	Time = glutGet(GLUT_ELAPSED_TIME);
 	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
-	
+	//MyModel[3].Rotation.y += 3*DeltaTime;//зеркало//пока не работает
 }
 
 void MouseWheelFunc(int wheel, int direction, int x, int y)
