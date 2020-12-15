@@ -30,7 +30,7 @@ struct VertexText
 
 #define PI 3.14159265359
 
-
+const int MaxText = 2;
 
 class Model
 {
@@ -48,17 +48,22 @@ public:
 	glm::vec3 Rotation;
 
 	GLuint program;
+	GLenum modeDraw;
+
 	GLuint mvpLoc;	
 	GLuint mLoc;
 	GLuint nmLoc;	
-	GLuint LightLoc;
+	
 	GLuint CameraVLoc;
 	GLuint cameraRotLoc;
-	GLenum modeDraw;
+	
+	GLuint LightLoc;
 
-	GLuint textureID;
-
+	GLuint textureID[MaxText];
+	GLuint textLoc[MaxText];
+	GLuint textureCount;
 	Model();
+	~Model();
 	/*Model(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
 		const char* vertexPath, const char* fragmentPath);*/
@@ -72,30 +77,61 @@ public:
 		Shader sh, GLfloat* normals = NULL);
 
 	void InitText(GLfloat* vertices, GLuint size_vertices,
-		GLuint* ver_indices, GLuint size_indices, 
-		GLenum modeDraw,Shader sh,
-		GLfloat* normals,
-		const char* texture, GLfloat* text_coord);
+		GLuint* ver_indices, GLuint size_indices,
+		GLenum modeDraw, Shader sh,
+		GLfloat* normals, GLfloat* text_coord);
 
-	void InitTextObj(GLfloat* vertices, GLuint size_vertices,
+	/*void InitTextObj(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
 		GLenum modeDraw, Shader sh, const char* texture,
 		GLfloat* normals, GLuint normal_size,		
 		GLfloat* text_coord, GLuint text_size );
+		*/
 	void Use() { glUseProgram(program); }
 	void UseMaterial(GLfloat* DiffuseMaterial);
-
+	void loatText(const char* texture);
 private:
 
 };
 
+void Model::loatText(const char* texture)
+{
+	if (textureCount >= MaxText)
+	{
+		std::cout << "ERROR - MAX TEXTURE LOAD" << std::endl;
+		return;
+	}
+	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(texture, 0);
+	FIBITMAP* image = FreeImage_Load(format, texture);
+	FIBITMAP* temp = image;
+	image = FreeImage_ConvertTo32Bits(image);
+	FreeImage_Unload(temp);
+
+	int w = FreeImage_GetWidth(image);
+	int h = FreeImage_GetHeight(image);
+
+	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
+
+	//Генерация the OpenGL текстурного обЪекта 
+	glGenTextures(1, &(textureID[textureCount]));
+
+	glBindTexture(GL_TEXTURE_2D, textureID[textureCount]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	FreeImage_Unload(image);
+
+	textureCount++;
+	std::cout << program << ' ' << textureCount << endl;;
+}
 Model::Model()
 {
-	//points = NULL; 
-	textureID = 0;
+	//points = NULL; 	
 	vertexBuffer = 0;
 	vertexArray = 0;;
-	indexArray = 0;;
+	indexArray = 0;
 	modeDraw = GL_TRIANGLES;
 	sizeIndex = 0;
 
@@ -108,6 +144,10 @@ Model::Model()
 	mLoc = 0;
 	LightLoc = 0;	
 	cameraRotLoc = 0;
+
+	textureCount = 0;
+	textLoc[0] = textLoc[1] = 0;
+	//textureID = 0;
 }
 /*Model::Model(GLfloat* vertices,  GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices,
@@ -240,8 +280,14 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 	//свет	
 	glUniform3fv(LightLoc, 1,&(*Light)[0]);
 
-	glActiveTexture(textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	for (int i = 0; i < textureCount; i++)
+	{
+		std::cout << program << ' ' << textLoc[i] << ' '<<(GLuint)(-1) << std::endl;
+		//glActiveTexture(textureID[i]);
+		glBindTexture(GL_TEXTURE_2D, textureID[i]);
+		glUniform1i(textLoc[i], i);
+	}
+	
 
 	glDrawElements(modeDraw, sizeIndex, GL_UNSIGNED_INT, 0);
 
@@ -340,8 +386,7 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices, 
 	GLenum modeDraw, Shader sh,
-	GLfloat* normals, 
-	const char* texture, GLfloat* text_coord)
+	GLfloat* normals,  GLfloat* text_coord)
 {
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
 	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -359,28 +404,10 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	std::cout << "MOdelText ID=" << program << std::endl;
 	//-----------------------------------------------//
 	// Загрузка текстуры
+	//в другой функции
 	
-	FREE_IMAGE_FORMAT format = FreeImage_GetFileType(texture, 0);
-	FIBITMAP* image = FreeImage_Load(format, texture);
-	FIBITMAP* temp = image;
-	image = FreeImage_ConvertTo32Bits(image);
-	FreeImage_Unload(temp);
-
-	int w = FreeImage_GetWidth(image);
-	int h = FreeImage_GetHeight(image);
-
-	GLubyte* bits = (GLubyte*)FreeImage_GetBits(image);
-
-	//Генерация the OpenGL текстурного обЪекта 
 	
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	FreeImage_Unload(image);
+	
 	//-----------------------------------------------//
 	
 	//создание массива вершин
@@ -397,10 +424,14 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 			points[i].normal = glm::vec3(normals[i * 3], normals[i * 3 + 1], normals[i * 3 + 2]);
 		}
 	}
-	for (GLuint i = 0; 3*i < size_vertices ; i++)
+	//if (text_coord != NULL)
 	{
-		points[i].texcoords = glm::vec2(text_coord[i * 2], text_coord[i * 2 + 1]);
+		for (GLuint i = 0; 3 * i < size_vertices; i++)
+		{
+			points[i].texcoords = glm::vec2(text_coord[i * 2], text_coord[i * 2 + 1]);
+		}
 	}
+	
 	//-----------------------------------------------//
 	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
 	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
@@ -446,7 +477,16 @@ void Model::UseMaterial(GLfloat* DiffuseMaterial)
 }
 
 
-
+Model::~Model()
+{
+	
+	if (vertexArray != 0)
+	{
+		glDeleteBuffers(1, &vertexBuffer);
+		glDeleteVertexArrays(1, &vertexArray);
+		glDeleteBuffers(1, &indexArray);
+	}
+}
 
 
 

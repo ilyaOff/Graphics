@@ -182,12 +182,14 @@
     <None Include="CookTorranceVertex.glsl" />
     <None Include="CubeFrag.glsl" />
     <None Include="CubeVertex.glsl" />
+    <None Include="ParalaxFrag.glsl" />
     <None Include="PyramidFrag.glsl" />
     <None Include="PyramidVertex.glsl" />
     <None Include="TextureFongFrag.glsl" />
     <None Include="TextureFongVertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="DisplacementMap.png" />
     <Image Include="Metall1.jpg" />
     <Image Include="NormalMap.png" />
   </ItemGroup>

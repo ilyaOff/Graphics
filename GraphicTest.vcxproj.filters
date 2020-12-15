@@ -82,12 +82,18 @@
     <None Include="TextureFongVertex.glsl">
       <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
     </None>
+    <None Include="ParalaxFrag.glsl">
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Metall1.jpg">
       <Filter>Файлы ресурсов</Filter>
     </Image>
     <Image Include="NormalMap.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="DisplacementMap.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

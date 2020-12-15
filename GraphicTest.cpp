@@ -42,6 +42,7 @@ float Time;
 float DeltaTime;
 bool startTime = false;
 
+
 void init()
 {
 	glEnable(GL_DEPTH_TEST);//Включение теста по Z-буфферу
@@ -55,7 +56,7 @@ void init()
 	//полностью - GL_FILL
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);		
 	
-	//куб - зеркало камеры
+	//куб 
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
@@ -77,7 +78,7 @@ void init()
 	MyModel[2].Position = glm::vec3(0.0f, 0.5f, -3.5f);
 	MyModel[2].Rotation = glm::vec3(10.0f, 0.0f, 0.0f);
 
-	//пол
+	//пол-зеркало
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
 		Shader("PyramidVertex.glsl", "CubeFrag.glsl"),
@@ -100,23 +101,35 @@ void init()
 	MyModel[5].InitText(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"),
-		cube_normal,
-		"Metall1.jpg",cube_text);
-
+		cube_normal, cube_text	);
+	MyModel[5].Use();
 	MyModel[5].Position = glm::vec3(-1.0f, 0.5f, -2.5f);
 	MyModel[5].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	MyModel[5].loatText("Metall1.jpg");
+	MyModel[5].textLoc[0] = glGetUniformLocation(MyModel[5].program, "Map");
+	//MyModel[5].textureCount = 1;
 	
 	//плоскость
 	MyModel[6].InitText(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
-		Shader("TextureFongVertex.glsl", "FragNormalMap.glsl"),
-		floor_normals,
-		"NormalMap.png", floor_text_normal);
+		Shader("TextureFongVertex.glsl", "ParalaxFrag.glsl"),
+		//Shader("TextureFongVertex.glsl", "FragNormalMap.glsl"),
+		floor_normals, floor_text_normal);
+	MyModel[6].Use();
+	MyModel[6].loatText("Metall1.jpg");//"DisplacementMap.png" 
+	MyModel[6].textLoc[0] = glGetUniformLocation(MyModel[6].program, "Map");
+
+	MyModel[6].loatText("NormalMap.png");	
+	MyModel[6].textLoc[1] = glGetUniformLocation(MyModel[6].program, "Map2");
+	MyModel[6].textLoc[1] = glGetUniformLocation(MyModel[6].program, "Map2");
+
+	//MyModel[6].textureCount = 2;
+
+	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -10.0f);
+	MyModel[6].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
 	
-	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -5.0f);
-	MyModel[6].Rotation = glm::vec3(PI/4, 0.0f, 0.0f);
-	
-	
+
 }
 
 glm::mat4x4 proj;
@@ -170,7 +183,7 @@ void display(void)
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
 	
 	glm::mat4x4 ReflectMat = glm::translate(-MyModel[3].Position)
-			*glm::mat4x4(glm::quat(-MyModel[3].Rotation));
+			*glm::mat4x4(glm::quat(MyModel[3].Rotation));
 
 	glm::vec3 CamZerPos;
 	glm::vec3 CamZerRot;
@@ -197,11 +210,16 @@ void display(void)
 	
 	
 	
-	CamZerRot = CameraRotation;// -MyModel[3].Rotation;
+	CamZerRot = CameraRotation;// +MyModel[3].Rotation;
 	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
 	
-	glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
+	
+	//glm::mat4x4 ZerRot =  glm::mat4x4(glm::quat(-MyModel[3].Rotation));	
+	//CamZerRot = glm::vec3(ZerRot * glm::vec4(CameraRotation, 1));
+	//CamZerRot = glm::vec3(-CamZerRot.x,CamZerRot.y, CamZerRot.z);
+	//CamZerRot = glm::vec3(glm::inverse(ZerRot) * glm::vec4(CamZerRot, 1));
+	//glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
 
 	/*
 	std::cout << "CAM " <<
@@ -224,7 +242,7 @@ void display(void)
 	for(int i = 0; i < N; i++)
 	{		
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj, &(lightRef),	&CameraVReflect);
+		MyModel[i].glDrawModel(&proj, &(LightDirection),	&CameraVReflect);
 	}
 	//glFrontFace(GL_CW);
 	//glDepthFunc(GL_GREATER);
@@ -371,6 +389,7 @@ void keypress(unsigned char key, int x, int y)
 			}
 			break;		
 		case 'Й':case 'й':case 'Q': case 'q': 
+			//startTime = false;
 			MouseCursor = !MouseCursor;
 			if (MouseCursor)
 			{
