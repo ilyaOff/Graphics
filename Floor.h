@@ -9,7 +9,7 @@ float floor_vertices[] = {
 };
 GLuint floor_indices[] = {
 	0,2,1,
-	0,3,2,
+	3,2,0,
 };
 float floor_normals[] = {
 	0.0f, 1.0f, 0.0f,//A

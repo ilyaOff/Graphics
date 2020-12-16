@@ -114,7 +114,7 @@ void Model::loatText(const char* texture)
 
 	//Генерация the OpenGL текстурного обЪекта 
 	glGenTextures(1, &(textureID[textureCount]));
-
+	std::cout << program << 'S' << textureID[textureCount] << endl;
 	glBindTexture(GL_TEXTURE_2D, textureID[textureCount]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
 
@@ -124,7 +124,7 @@ void Model::loatText(const char* texture)
 	FreeImage_Unload(image);
 
 	textureCount++;
-	std::cout << program << ' ' << textureCount << endl;;
+	std::cout << program << ' ' << textureCount << endl;
 }
 Model::Model()
 {
@@ -282,8 +282,8 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 
 	for (int i = 0; i < textureCount; i++)
 	{
-		std::cout << program << ' ' << textLoc[i] << ' '<<(GLuint)(-1) << std::endl;
-		//glActiveTexture(textureID[i]);
+		//std::cout << program << ' ' << textLoc[i] << ' '<<(GLuint)(-1) << std::endl;
+		glActiveTexture(GL_TEXTURE0+i);		
 		glBindTexture(GL_TEXTURE_2D, textureID[i]);
 		glUniform1i(textLoc[i], i);
 	}

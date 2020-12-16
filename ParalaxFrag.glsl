@@ -64,7 +64,7 @@ vec4 FongLight(vec4 DiffuselightColor, vec3 lightdir, vec4 DiffuseMaterial,
 
 void main(void) {
 	
-	vec2 T1 = textCoor; //+ texture2D(Map2, textCoor).a*normalize(e).xy;
+	vec2 T1 = textCoor+(texture2D(Map2, textCoor).b -0.5f)*e.xy;
 	vec3 n =  (texture2D(Map,T1).rgb - vec3(0.5f,0.5f,0.5f))*2;
 	n = normalize(n);
 	

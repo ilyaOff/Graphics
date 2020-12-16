@@ -112,19 +112,17 @@ void init()
 	
 	//плоскость
 	MyModel[6].InitText(floor_vertices, sizeof(floor_vertices),
-		floor_indices, sizeof(floor_indices), GL_QUADS,
+		floor_indices, sizeof(floor_indices), GL_TRIANGLES,
 		Shader("TextureFongVertex.glsl", "ParalaxFrag.glsl"),
 		//Shader("TextureFongVertex.glsl", "FragNormalMap.glsl"),
 		floor_normals, floor_text_normal);
 	MyModel[6].Use();
-	MyModel[6].loatText("Metall1.jpg");//"DisplacementMap.png" 
+	MyModel[6].loatText("NormalMap.png");
 	MyModel[6].textLoc[0] = glGetUniformLocation(MyModel[6].program, "Map");
 
-	MyModel[6].loatText("NormalMap.png");	
-	MyModel[6].textLoc[1] = glGetUniformLocation(MyModel[6].program, "Map2");
+	MyModel[6].loatText("DisplacementMap.png");// 
 	MyModel[6].textLoc[1] = glGetUniformLocation(MyModel[6].program, "Map2");
 
-	//MyModel[6].textureCount = 2;
 
 	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -10.0f);
 	MyModel[6].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
@@ -302,7 +300,8 @@ void idle(void)
 	Time = glutGet(GLUT_ELAPSED_TIME);
 	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
-	//MyModel[6].Rotation.x += 3*DeltaTime;
+	MyModel[5].Rotation.y += 3 * DeltaTime;
+	MyModel[6].Rotation.z += 3*DeltaTime;
 	//MyModel[3].Rotation.y += 3*DeltaTime;//зеркало//пока не работает
 }
 
