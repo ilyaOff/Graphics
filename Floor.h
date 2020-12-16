@@ -21,7 +21,7 @@ float floor_normals[] = {
 float floor_text_normal[] =
 {
 	1,1,
-	0,1,	
-	0,0,
 	1,0,	
+	0,0,
+	0,1,	
 };

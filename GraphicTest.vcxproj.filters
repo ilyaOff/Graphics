@@ -85,6 +85,9 @@
     <None Include="ParalaxFrag.glsl">
       <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
     </None>
+    <None Include="ParalaxVertex.glsl">
+      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Metall1.jpg">
@@ -97,6 +100,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Image>
     <Image Include="DisplacementMap2.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="Normal-and-displacement-maps-before-and-after-a-collision-respectively-The-displacement.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

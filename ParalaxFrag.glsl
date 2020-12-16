@@ -19,9 +19,9 @@ in vec2 textCoor;
 uniform sampler2D Map;
 uniform sampler2D Map2;
 
-in vec3 lightDirection;//на источник
-in vec3 e;
-in vec3 r;
+in vec3 lightDirectionT;//на источник
+in vec3 et;
+
 
 
 out vec4 color;
@@ -61,16 +61,20 @@ vec4 FongLight(vec4 DiffuselightColor, vec3 lightdir, vec4 DiffuseMaterial,
 	return ambient*kLight.x + diffuse * kLight.y + surface* kLight.z;
 }
 
-
+uniform float scale = 0.2f;
+uniform float bias = 0.005f;
 void main(void) {
 	
-	vec2 T1 = textCoor;//+(texture2D(Map2, textCoor).b -0.5f)*e.xy;
+	//vec3 et = vec3(,,dot(n,e));
+	float h = bias + scale*(texture2D(Map2, textCoor).r -0.5f);
+	vec2 T1 = textCoor+ h*et.xy/ et.z;
+	
 	vec3 n =  (texture2D(Map,T1).rgb - vec3(0.5f,0.5f,0.5f))*2;
 	n = normalize(n);
 	
-	vec3 R = normalize(reflect(lightDirection,n));
+	vec3 R = normalize(reflect(lightDirectionT,n));
 
-	color = FongLight(LightColor,normalize(lightDirection),MaterialDiffuse,	
+	color = FongLight(LightColor,normalize(lightDirectionT),MaterialDiffuse,	
 						LightColorAmbient, MaterialAmbient, n,
-						LightColor, R, normalize(e), MaterialSurface);
+					LightColor, R, normalize(et), MaterialSurface);
 }

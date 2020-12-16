@@ -183,6 +183,7 @@
     <None Include="CubeFrag.glsl" />
     <None Include="CubeVertex.glsl" />
     <None Include="ParalaxFrag.glsl" />
+    <None Include="ParalaxVertex.glsl" />
     <None Include="PyramidFrag.glsl" />
     <None Include="PyramidVertex.glsl" />
     <None Include="TextureFongFrag.glsl" />
@@ -192,6 +193,7 @@
     <Image Include="DisplacementMap.png" />
     <Image Include="DisplacementMap2.png" />
     <Image Include="Metall1.jpg" />
+    <Image Include="Normal-and-displacement-maps-before-and-after-a-collision-respectively-The-displacement.png" />
     <Image Include="NormalMap.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
