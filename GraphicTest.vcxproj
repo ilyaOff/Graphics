@@ -190,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="DisplacementMap.png" />
+    <Image Include="DisplacementMap2.png" />
     <Image Include="Metall1.jpg" />
     <Image Include="NormalMap.png" />
   </ItemGroup>

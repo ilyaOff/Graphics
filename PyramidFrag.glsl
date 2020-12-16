@@ -1,7 +1,7 @@
 #version 330 core
 
 
-uniform vec3 kLight = vec3(1.0,1.0,1.0);
+uniform vec3 kLight = vec3(0.0,0.0,1.0);
 
 
 uniform vec4 LightColorAmbient = vec4(0.3,0.3,0.3,1.0);
@@ -11,7 +11,7 @@ uniform float PowerGlare = 32.0f;
 
 uniform vec4 MaterialAmbient = vec4(0.2,0.2,0.2,1.0);
 uniform vec4 MaterialDiffuse = vec4(0.8,0.8,0.8,1);
-uniform vec4 MaterialSurface = vec4(0.2,0.2,0.2,1.0);
+uniform vec4 MaterialSurface = vec4(1.2,1.2,1.2,1.0);
 
 in vec3 Vertex;
 in vec3 normal;

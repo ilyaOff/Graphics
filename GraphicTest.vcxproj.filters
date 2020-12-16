@@ -96,5 +96,8 @@
     <Image Include="DisplacementMap.png">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+    <Image Include="DisplacementMap2.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

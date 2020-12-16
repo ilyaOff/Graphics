@@ -24,7 +24,7 @@ void main() {
 	normal = normalize(nm * modelNormal);
 	
 	vec4 pos = CameraV* m * vec4(modelPos, 1);
-	e = normalize(pos.xyz/pos.z);
+	e = normalize(-pos.xyz/pos.z);
 
 	vec4 light = CameraV* vec4(LightPos, 1);
 	lightDirection  = normalize(light.xyz/light.w - (pos.xyz / pos.w));	
