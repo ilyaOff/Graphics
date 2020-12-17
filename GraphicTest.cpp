@@ -22,6 +22,8 @@ using namespace std;
 #include "Shader.h"
 const int N = 7;//количество моделей
 Model MyModel[N];
+int  MyModelDraw[N];
+
 
 float Fov = 45;
 int W, H;
@@ -175,7 +177,7 @@ void display(void)
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
 
 	MyModel[3].glDrawModel(&proj, &(LightDirection),&CameraRot);//зеркало
-	
+	MyModelDraw[3] = 0;
 	
 	glm::mat4x4 ReflectMat = glm::translate(-MyModel[3].Position)
 			*glm::mat4x4(glm::quat(MyModel[3].Rotation));
@@ -240,29 +242,31 @@ void display(void)
 	glDepthMask(GL_TRUE);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
-
+	
+	
 	for(int i = 0; i < N; i++)
 	{		
 		if (i != 3)
 		{
 			//если объект не за зеркалом
-			if((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y > -0.5f)
+			if ((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y >= 0)
+			{
 				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
-		}
-		
-	}
-
-
-
+				MyModelDraw[i] = 0;
+			}
+			else
+			{
+				MyModelDraw[i] = 1;
+			}
+		}		
+	}	
 
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	for (int i = 0; i < N; i++)
 	{
-		if (i != 3)
-		{
-			//если объект за зеркалом
-			if ((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y <= -0.5f)
-				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+		if (MyModelDraw[i])//если объект за зеркалом
+		{		
+			MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 		}
 
 	}
@@ -271,21 +275,17 @@ void display(void)
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glDepthFunc(GL_GEQUAL);
+	glDepthFunc(GL_EQUAL);
 	//glStencilOp(GL_KEEP,  GL_KEEP, GL_ZERO);
 	for (int i = 0; i < N; i++)
 	{
-		if (i != 3)
+		if (MyModelDraw[i])//если объект за зеркалом
 		{
-			//если объект за зеркалом
-			if ((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y <=-0.5f)
-				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+			MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 		}
-
 	}
 	//--------------------------------------//
 	
-
 	//Удалить грани, которые за зеркалом
 	//glDisable(GL_STENCIL_TEST);
 	//glDepthFunc(GL_GREATER);
