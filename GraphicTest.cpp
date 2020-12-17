@@ -150,7 +150,7 @@ void display(void)
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
 	*/	
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);\
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	//glm::mat4x4 
 	glm::mat4x4 CameraRot = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
@@ -176,11 +176,6 @@ void display(void)
 
 	MyModel[3].glDrawModel(&proj, &(LightDirection),&CameraRot);//зеркало
 	
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	//glEnable(GL_DEPTH_TEST);
-	glDepthMask(GL_TRUE);	
-	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
-	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
 	
 	glm::mat4x4 ReflectMat = glm::translate(-MyModel[3].Position)
 			*glm::mat4x4(glm::quat(MyModel[3].Rotation));
@@ -230,27 +225,89 @@ void display(void)
 		CamZerPos.x << ' ' << CamZerPos.y << ' ' << CamZerPos.z << endl << endl
 		<< CamZerRot.x << ' ' << CamZerRot.y << ' ' << CamZerRot.z << endl;;
 */
-	//glDisable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
+	
 	glm::mat4x4 CameraVReflect = glm::scale(glm::vec3(1, -1, 1))
 				//*glm::mat4x4(a)
 				* glm::rotate(CamZerRot.z, glm::vec3(0.0f, 0.0f, 1.0f))
 				* glm::rotate(CamZerRot.x, glm::vec3(1.0f, 0.0f, 0.0f))
 				* glm::rotate(CamZerRot.y, glm::vec3(0.0f, 1.0f, 0.0f))
 				* glm::translate(-CamZerPos);
+
+	//glDisable(GL_CULL_FACE);
+	glFrontFace(GL_CCW);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	//glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);//Не меняем трафарет
+	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
+
 	for(int i = 0; i < N; i++)
 	{		
-		if(i != 3)
-		MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+		if (i != 3)
+		{
+			//если объект не за зеркалом
+			if((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y > -0.5f)
+				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+		}
+		
+	}
+
+
+
+
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	for (int i = 0; i < N; i++)
+	{
+		if (i != 3)
+		{
+			//если объект за зеркалом
+			if ((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y <= -0.5f)
+				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+		}
+
+	}
+	glDepthFunc(GL_GREATER);
+	glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);
+	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glDepthFunc(GL_GEQUAL);
+	//glStencilOp(GL_KEEP,  GL_KEEP, GL_ZERO);
+	for (int i = 0; i < N; i++)
+	{
+		if (i != 3)
+		{
+			//если объект за зеркалом
+			if ((ReflectMat * glm::vec4(MyModel[i].Position, 1)).y <=-0.5f)
+				MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
+		}
+
 	}
 	//--------------------------------------//
+	
+
+	//Удалить грани, которые за зеркалом
+	//glDisable(GL_STENCIL_TEST);
+	//glDepthFunc(GL_GREATER);
+	
+	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	//glDisable(GL_CULL_FACE);
+	
+	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
+
+	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
+	//glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	
+	//--------------------------------------//
 	//Не видно, что под зеркалом + смешение цвета
-	glDepthFunc(GL_LESS);
+	//glDisable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);//Не меняем трафарет
+	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
+
+	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
-	glDisable(GL_STENCIL_TEST);
-
-	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
@@ -261,7 +318,7 @@ void display(void)
 	//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	//-------------------------------------------------//
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);	
@@ -294,7 +351,7 @@ void display(void)
 	
 
 	glutSwapBuffers();
-	glFlush();//передает команды на исполнение
+//	glFlush();//передает команды на исполнение
 	
 }
 void idle(void) 
