@@ -244,16 +244,21 @@ void display(void)
 		MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 	}
 	//--------------------------------------//
-	//Не видно, что под зеркалом
+	//Не видно, что под зеркалом + смешение цвета
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
 
-	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);//зеркало
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
+	glDisable(GL_BLEND);
+	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
+	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);//зеркало
 
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	//-------------------------------------------------//
 	glDepthFunc(GL_LEQUAL);
@@ -273,13 +278,12 @@ void display(void)
 	*/
 	//glDisable(GL_LIGHTING);
 	//--------------------------------------------------//
-	//glFrontFace(GL_CW);
-
-	//glDisable(GL_CULL_FACE);
+	/*
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
 	glDisable(GL_BLEND);
+	*/
 	//--------------------------------------------------//
 	if (SwapCamers)
 	{
@@ -366,10 +370,10 @@ void MouseMove(int x, int y)
 			delta = (float)(y + y -H) / (H + H);
 			if(delta > 0.0007 || delta < -0.0007)
 				CameraRotation.x += 3.5f * (delta);
-			//if (CameraRotation.x > 15)
-			//	CameraRotation.x = 15;
-			//if (CameraRotation.x < -15)
-			//	CameraRotation.x = -15;
+			if (CameraRotation.x > 70*PI/180)
+				CameraRotation.x = 70 * PI / 180;
+			if (CameraRotation.x < -70*PI/180)
+				CameraRotation.x = -70 * PI / 180;
 			glutWarpPointer(W / 2, H / 2);
 			glutPostRedisplay();
 			//cout << ((float)y / H - 0.5f) << endl;
