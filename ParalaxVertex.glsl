@@ -28,8 +28,7 @@ void main() {
 	/*
 	vec3 t = vec3(modelNormal.y, -modelNormal.x, 0);
 	vec3 b = vec3(0, -modelNormal.z, modelNormal.y);
-	b = b- dot(b,t)*t;
-	
+	b = b- dot(b,t)*t;	
 	*/
 	// n = (0,1,0)
 	vec3 t = vec3(1, 0, 0);

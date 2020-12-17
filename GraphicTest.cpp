@@ -41,7 +41,9 @@ bool SwapCamers = false;
 float Time;
 float DeltaTime;
 bool startTime = false;
-float scale = 0.2f;
+
+float bias = 0.005f;
+//float scale = 0.2f;
 
 void init()
 {
@@ -81,7 +83,7 @@ void init()
 	//пол-зеркало
 	MyModel[3].Init(floor_vertices, sizeof(floor_vertices),
 		floor_indices, sizeof(floor_indices), GL_QUADS,
-		Shader("PyramidVertex.glsl", "CubeFrag.glsl"),
+		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
 		floor_normals);
 	MyModel[3].Position = glm::vec3(0.0f, -0.5f, 0.0f);
 	MyModel[3].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -98,10 +100,10 @@ void init()
 
 	
 	//Куб с текстурой
-	MyModel[5].InitText(cube_vertices, sizeof(cube_vertices),
-		cube_indices, sizeof(cube_indices), GL_QUADS,
+	MyModel[5].InitText(cube_vertices2, sizeof(cube_vertices2),
+		cube_indices2, sizeof(cube_indices2), GL_QUADS,
 		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"),
-		cube_normal, cube_text	);
+		cube_normal2, cube_text2);
 	MyModel[5].Use();
 	MyModel[5].Position = glm::vec3(-1.0f, 0.5f, -2.5f);
 	MyModel[5].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -192,7 +194,7 @@ void display(void)
 	CamZerPos = glm::vec3(glm::inverse(ReflectMat) * glm::vec4(CamZerPos, 1));
 	
 	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно	
-	//Будет ошибка, так как не работаю с кватернионами
+	
 	/*
 	glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f))*
 		glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
@@ -206,8 +208,7 @@ void display(void)
 	
 	*/
 	
-	
-	
+	//Будет ошибка, так как не работаю с кватернионами
 	CamZerRot = CameraRotation;// +MyModel[3].Rotation;
 	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
@@ -240,26 +241,25 @@ void display(void)
 	for(int i = 0; i < N; i++)
 	{		
 		if(i != 3)
-		MyModel[i].glDrawModel(&proj, &(LightDirection),	&CameraVReflect);
+		MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 	}
-	//glFrontFace(GL_CW);
-	//glDepthFunc(GL_GREATER);
-	//glDisable(GL_CULL_FACE);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//MyModel[3].Position += glm::vec3(0, 0.001f, 0);
-	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraPosition, &CameraRotation); //Цвет панели
-	//MyModel[3].Position -= glm::vec3(0, 0.001f, 0);
-	//glDisable(GL_BLEND);
-
-
-	//-------------------------------------------------//
+	//--------------------------------------//
+	//Не видно, что под зеркалом
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);
-	
-	//glStencilFunc(GL_GEQUAL, 1, 0xFF);//рисуем только там, где зеркало
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);//без цвета
+
+	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);//зеркало
+
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+	//-------------------------------------------------//
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	glFrontFace(GL_CW);
+	glDisable(GL_STENCIL_TEST);	
 	
 	for (int i = 0; i < N; i++)
 	{
@@ -272,8 +272,15 @@ void display(void)
 	MyModel[3].Position += glm::vec3(0, 0.001f, 0);
 	*/
 	//glDisable(GL_LIGHTING);
-	
+	//--------------------------------------------------//
+	//glFrontFace(GL_CW);
 
+	//glDisable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
+	glDisable(GL_BLEND);
+	//--------------------------------------------------//
 	if (SwapCamers)
 	{
 		CameraPosition = CamZerPos;
@@ -300,7 +307,7 @@ void idle(void)
 	Time = glutGet(GLUT_ELAPSED_TIME);
 	DeltaTime = 0.0001*(Time - DeltaTime);	
 	MyModel[2].Rotation.y += DeltaTime;//для себя
-	MyModel[5].Rotation.y += 3 * DeltaTime;
+	//MyModel[5].Rotation.y += 3 * DeltaTime;
 	MyModel[6].Rotation.z += 3*DeltaTime;
 	//MyModel[3].Rotation.y += 3*DeltaTime;//зеркало//пока не работает
 }
@@ -317,18 +324,20 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	
 	*/
 	//bias += 0.001f;
-	/*
+	
 	if (direction < 0)
-		bias -= 0.1f;
+		bias -= 0.001f;
 	else
-		bias += 0.1f;
-		*/
+		bias += 0.001f;
+	cout << "BIAS = " << glGetUniformLocation(MyModel[6].program, "bias") << endl;
+	/*
 	if (direction < 0)
 		scale -= 0.1f;
 	else
 		scale += 0.1f;
-
-	glUniform1f(glGetUniformLocation(MyModel[6].program, "scale") , scale);
+	*/
+	MyModel[6].Use();
+	glUniform1f(glGetUniformLocation(MyModel[6].program, "bias") , bias);
 
 	MyModel[0].Rotation.y +=  (direction / 5.0f);
 	MyModel[1].Rotation.y += (direction / 5.0f);

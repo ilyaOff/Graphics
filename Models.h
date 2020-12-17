@@ -267,7 +267,7 @@ void Model::glDrawModel(glm::mat4* proj, glm::vec3* Light,
 	cout << glm::determinant(nm) << ' ' << glm::determinant(mv) << endl;
 	*/
 	//для шейдеров
-	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу для шейдера Модельно-Видовая-Спроецированная
+	glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, &mvp[0][0]);//определяем матрицу  Модельно-Видовая-Спроецированная
 	glUniformMatrix4fv(mLoc, 1, GL_FALSE, &m[0][0]);//определяем матрицу 	Модельная
 	glUniformMatrix3fv(nmLoc, 1, GL_FALSE, &nm[0][0]);//определяем матрицу преобразования нормалей
 
@@ -478,8 +478,7 @@ void Model::UseMaterial(GLfloat* DiffuseMaterial)
 
 
 Model::~Model()
-{
-	
+{	
 	if (vertexArray != 0)
 	{
 		glDeleteBuffers(1, &vertexBuffer);
