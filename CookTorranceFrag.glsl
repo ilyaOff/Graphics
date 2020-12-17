@@ -51,6 +51,7 @@ float Beksman(float dotNH)
 float Frenel(float dotNE)
 {
 	float kNE =(1 - dotNE);
+	kNE = kNE*kNE;
 	kNE = kNE*kNE*(1 - dotNE);
 
 	float eta2 = eta*eta;
@@ -129,8 +130,10 @@ void main(void) {
 
 	//vec4 mat =  vec4(Vertex + vec3(0.5,0.5,0.5),0);
 	//color = vec4(normal + vec3(0.5,0.5,0.5), 1);
+	//color = vec4((1+dot(e,lightDirection ))/2,0,0,0);
 	color = Light(LightColor,normalize(lightDirection),
 						normalize(normal), MaterialDiffuse,	
 						LightColorAmbient, MaterialAmbient,
 						LightColor,  normalize(e), MaterialSurface);
+						
 }

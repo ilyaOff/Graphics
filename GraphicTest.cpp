@@ -268,7 +268,6 @@ void display(void)
 		{		
 			MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 		}
-
 	}
 	glDepthFunc(GL_GREATER);
 	glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
@@ -406,6 +405,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	
 	//MyModel[3].Rotation.x += (direction / 5.0f);
 	MyModel[4].Position.y += (direction / 5.0f);
+	MyModel[1].Position.y += (direction / 5.0f);
 	glutPostRedisplay();
 	//display();
 	//cout << yAngle << ' ' << yAngle2 << endl;
