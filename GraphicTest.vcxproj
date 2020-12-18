@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib; $(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories);$(ProjectDir)Text</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Text;$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glew\include;$(ProjectDir)Text;%(AdditionalIncludeDirectories);$(ProjectDir)Text</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Text;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;$(ProjectDir)Mylib\freeimage\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories);$(ProjectDir)Text</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Text;$(MSBuildProjectDirectory)\MyLib;$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,7 +149,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)Mylib\freeimage\include;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;%(AdditionalIncludeDirectories);$(ProjectDir)Text</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Text;$(ProjectDir)Mylib\freeglut\include;$(ProjectDir)Mylib\glm;$(ProjectDir)Mylib\glew\include;$(ProjectDir)Mylib\freeimage\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>

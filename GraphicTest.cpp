@@ -526,14 +526,16 @@ void keypress(unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {    
     glutInit(&argc, argv);
-   
-    glutCreateWindow("SIMPLE PROGRAM");
-  
+	glutInitWindowPosition(100, 20);
+	glutInitWindowSize(1280, 720);
+	glutCreateWindow("SIMPLE PROGRAM");
+	
 	glewInit();
+	
 	init();
-
+	
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB |GLUT_DEPTH|GLUT_STENCIL);
-
+	
 
 	//ссылка на мои функции
 	glutMouseWheelFunc(MouseWheelFunc);
