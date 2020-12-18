@@ -7,7 +7,8 @@
 
 const int Ntetta = 30;
 const int Nphi = 60;
-
+const unsigned int size_sphere = 3 * ((Ntetta - 2) * Nphi + 2);
+const unsigned int size_sphere_index = 6 * (Ntetta - 2) * Nphi;
 float sphere_vertices[3 * ((Ntetta - 2) * Nphi + 2)];
 float sphere_normals[3 * ((Ntetta - 2) * Nphi + 2)];
 GLuint sphere_indexes[6*(Ntetta - 2 ) * Nphi ];
@@ -22,7 +23,7 @@ void Make_sphere(float R)
 	float tetta = 0;
 	float phi = 0;
 	float nx, ny, nz;
-	int index = 0;
+	unsigned int index = 0;
 	int nver = -1;
 	int	nextCircle, nextPoint;
 	for (int i = 0; i < Ntetta; i++)
@@ -90,6 +91,6 @@ void Make_sphere(float R)
 			
 		}
 	}
-	//std::cout << index << ' ' << 6 * (Ntetta)*Nphi << endl;
-	//std::cout << nver+1 << ' ' << 3 * ((Ntetta - 2) * Nphi + 2) << endl;
+	std::cout << endl << index << 'P' << 6 * (Ntetta)*Nphi << endl;
+	//std::cout << endl<< nver+1 << 'S' << 3 * ((Ntetta - 2) * Nphi + 2) << endl;
 }

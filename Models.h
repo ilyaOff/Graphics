@@ -114,7 +114,7 @@ void Model::loatText(const char* texture)
 
 	//Генерация the OpenGL текстурного обЪекта 
 	glGenTextures(1, &(textureID[textureCount]));
-	std::cout << program << 'S' << textureID[textureCount] << endl;
+	//std::cout << program << 'S' << textureID[textureCount] << endl;
 	glBindTexture(GL_TEXTURE_2D, textureID[textureCount]);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
 
@@ -124,7 +124,7 @@ void Model::loatText(const char* texture)
 	FreeImage_Unload(image);
 
 	textureCount++;
-	std::cout << program << ' ' << textureCount << endl;
+	//std::cout << program << ' ' << textureCount << endl;
 }
 Model::Model()
 {
@@ -307,14 +307,15 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	CameraVLoc = glGetUniformLocation(program, "CameraV");
 	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");	
 	LightLoc = glGetUniformLocation(program, "LightPos");
-	std::cout << "MOdel ID=" << program << std::endl;
+	//std::cout << "Model ID=" << program << std::endl;
 	//-----------------------------------------------//
 	Position = glm::vec3(0.0f, 0.0f, -4.0f);
 	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	this->modeDraw = modeDraw;
 	//создание массива вершин
 	
-	Vertex* points = new Vertex[size_vertices];
+	Vertex* points = NULL;
+	points = new Vertex[size_vertices];//не работает со сферой, почему-то
 	for (GLuint i = 0; i < size_vertices/3; i++)
 	{
 		/*
@@ -379,7 +380,7 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	glEnableVertexAttribArray(tmpLoc);
 	
 	glBindVertexArray(0);
-
+	delete[] points;
 }
 
 
@@ -401,13 +402,10 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
 	LightLoc = glGetUniformLocation(program, "LightPos");
 
-	std::cout << "MOdelText ID=" << program << std::endl;
+	//std::cout << "MOdelText ID=" << program << std::endl;
 	//-----------------------------------------------//
 	// Загрузка текстуры
 	//в другой функции
-	
-	
-	
 	//-----------------------------------------------//
 	
 	//создание массива вершин
@@ -466,6 +464,8 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	glEnableVertexAttribArray(tmpLoc);
 
 	glBindVertexArray(0);
+
+	delete[] points;
 
 }
 

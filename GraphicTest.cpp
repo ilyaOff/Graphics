@@ -19,6 +19,7 @@ using namespace std;
 
 
 #include "Models.h"
+
 #include "Shader.h"
 const int N = 7;//количество моделей
 Model MyModel[N];
@@ -60,7 +61,7 @@ void init()
 	//полностью - GL_FILL
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);		
 	
-	//куб 
+	//куб - положение источника света 
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
 		Shader("PyramidVertex.glsl", "PyramidFrag.glsl"),
@@ -93,8 +94,10 @@ void init()
 	
 	//золотая сфера
 	Make_sphere(1);
-	MyModel[4].Init(sphere_vertices, sizeof(sphere_vertices),
-		sphere_indexes, sizeof(sphere_indexes), GL_TRIANGLES,
+	//cout << sizeof(sphere_vertices);
+	//int a = sizeof(sphere_vertices);
+	MyModel[4].Init(sphere_vertices, /*sizeof(sphere_vertices)*/ size_sphere,
+		sphere_indexes,sizeof(sphere_indexes)/* size_sphere_index*/, GL_TRIANGLES,
 		Shader("CookTorranceVertex.glsl", "CookTorranceFrag.glsl"),
 		sphere_normals);
 
@@ -165,7 +168,6 @@ void display(void)
 	//Свет-солнце поворочативается вместе с камерой
 	//glm::vec3 a = glm::vec3(CameraV * Dir);	
 	//glm::mat4x4 CameraPos =  glm::translate(CameraPosition);
-	//glEnable(GL_LIGHTING);//????????????????
 	//-------------------------------------------------//
 	
 	glEnable(GL_STENCIL_TEST);//Буфер трафарета
@@ -260,7 +262,8 @@ void display(void)
 			}
 		}		
 	}	
-
+	//--------------------------------------//
+	//Не рисовать грани, находящиеся за зеркалом
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	for (int i = 0; i < N; i++)
 	{
@@ -270,7 +273,7 @@ void display(void)
 		}
 	}
 	glDepthFunc(GL_GREATER);
-	glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	glDisable(GL_CULL_FACE);
 	MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot);
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -283,25 +286,11 @@ void display(void)
 			MyModel[i].glDrawModel(&proj, &(LightDirection), &CameraVReflect);
 		}
 	}
-	//--------------------------------------//
-	
-	//Удалить грани, которые за зеркалом
-	//glDisable(GL_STENCIL_TEST);
-	//glDepthFunc(GL_GREATER);
-	
-	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	//glDisable(GL_CULL_FACE);
-	
-	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
-
-	//MyModel[3].glDrawModel(&proj, &(LightDirection), &CameraRot); //Цвет панели
-	//glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
-	//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	
 	//--------------------------------------//
 	//Не видно, что под зеркалом + смешение цвета
 	//glDisable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);//Не меняем трафарет
+	//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);//Не меняем трафарет
 	glStencilFunc(GL_EQUAL, 1, 0xFF);//рисуем только там, где зеркало
 
 	glDepthFunc(GL_LEQUAL);
@@ -318,7 +307,7 @@ void display(void)
 
 	//-------------------------------------------------//
 	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
+	/////////////////////glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
 	glDisable(GL_STENCIL_TEST);	
 	
@@ -389,7 +378,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 		bias -= 0.001f;
 	else
 		bias += 0.001f;
-	cout << "BIAS = " << glGetUniformLocation(MyModel[6].program, "bias") << endl;
+	//cout << "BIAS = " << glGetUniformLocation(MyModel[6].program, "bias") << endl;
 	/*
 	if (direction < 0)
 		scale -= 0.1f;
@@ -398,11 +387,11 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 	*/
 	MyModel[6].Use();
 	glUniform1f(glGetUniformLocation(MyModel[6].program, "bias") , bias);
-
-	MyModel[0].Rotation.y +=  (direction / 5.0f);
+		
 	MyModel[1].Rotation.y += (direction / 5.0f);
 	MyModel[2].Rotation.x += (direction / 5.0f);
-	
+	MyModel[5].Rotation.y += (direction / 5.0f);
+
 	//MyModel[3].Rotation.x += (direction / 5.0f);
 	MyModel[4].Position.y += (direction / 5.0f);
 	MyModel[1].Position.y += (direction / 5.0f);
@@ -458,9 +447,9 @@ void keypress(unsigned char key, int x, int y)
 		case 27:
 			glutDestroyWindow(glutGetWindow());
 			exit(1); break;
-		case 'U': case'u':
-			SwapCamers = true; break;
-		case 'Е':case 'е':case 'T': case't':
+		//case 'U': case'u':
+		//	SwapCamers = true; break;
+		case 'T': case't'://case 'Е':case 'е':
 			ModPolygon = !ModPolygon;
 			if (ModPolygon)
 			{
@@ -471,7 +460,7 @@ void keypress(unsigned char key, int x, int y)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			}
 			break;		
-		case 'Й':case 'й':case 'Q': case 'q': 
+		case 'Q': case 'q': //case 'Й':case 'й':
 			//startTime = false;
 			MouseCursor = !MouseCursor;
 			if (MouseCursor)
@@ -526,14 +515,16 @@ void keypress(unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {    
     glutInit(&argc, argv);
-   
-    glutCreateWindow("SIMPLE PROGRAM");
-  
+	glutInitWindowPosition(100, 20);
+	glutInitWindowSize(1280, 720);
+	glutCreateWindow("SIMPLE PROGRAM");
+	
 	glewInit();
+	
 	init();
-
+	
 	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB |GLUT_DEPTH|GLUT_STENCIL);
-
+	
 
 	//ссылка на мои функции
 	glutMouseWheelFunc(MouseWheelFunc);
@@ -543,6 +534,10 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutIdleFunc(idle);
 	glutKeyboardFunc(keypress);
+
+	//CameraPosition = glm::vec3(0, 0, 0);
+	//CameraRotation = glm::vec3(0, 0, 0);
+	//startMouseMove = false; glutPostRedisplay();
 	glutMainLoop();
     return 0;
 }

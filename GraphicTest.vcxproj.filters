@@ -50,9 +50,6 @@
     <ClInclude Include="Cat.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="MakePoints.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="FragNormalMap.glsl">
       <Filter>Исходные файлы\Шейдеры</Filter>
     </ClInclude>
