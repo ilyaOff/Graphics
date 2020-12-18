@@ -314,7 +314,8 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	this->modeDraw = modeDraw;
 	//создание массива вершин
 	
-	Vertex* points = new Vertex[size_vertices];
+	Vertex* points = NULL;
+	points = new Vertex[size_vertices];//не работает со сферой, почему-то
 	for (GLuint i = 0; i < size_vertices/3; i++)
 	{
 		/*
@@ -379,7 +380,7 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	glEnableVertexAttribArray(tmpLoc);
 	
 	glBindVertexArray(0);
-
+	delete[] points;
 }
 
 
@@ -405,9 +406,6 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	//-----------------------------------------------//
 	// Загрузка текстуры
 	//в другой функции
-	
-	
-	
 	//-----------------------------------------------//
 	
 	//создание массива вершин
@@ -466,6 +464,8 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	glEnableVertexAttribArray(tmpLoc);
 
 	glBindVertexArray(0);
+
+	delete[] points;
 
 }
 
