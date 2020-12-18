@@ -91,6 +91,6 @@ void Make_sphere(float R)
 			
 		}
 	}
-	std::cout << endl << index << 'P' << 6 * (Ntetta)*Nphi << endl;
+	//std::cout << endl << index << 'P' << 6 * (Ntetta)*Nphi << endl;
 	//std::cout << endl<< nver+1 << 'S' << 3 * ((Ntetta - 2) * Nphi + 2) << endl;
 }
