@@ -389,7 +389,7 @@ void MouseWheelFunc(int wheel, int direction, int x, int y)
 		bias -= 0.001f;
 	else
 		bias += 0.001f;
-	cout << "BIAS = " << glGetUniformLocation(MyModel[6].program, "bias") << endl;
+	//cout << "BIAS = " << glGetUniformLocation(MyModel[6].program, "bias") << endl;
 	/*
 	if (direction < 0)
 		scale -= 0.1f;
