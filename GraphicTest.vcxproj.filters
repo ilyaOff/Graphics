@@ -79,11 +79,14 @@
     <None Include="TextureFongVertex.glsl">
       <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
     </None>
-    <None Include="ParalaxFrag.glsl">
-      <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
-    </None>
     <None Include="ParalaxVertex.glsl">
       <Filter>Исходные файлы\Шейдеры\Вершинные</Filter>
+    </None>
+    <None Include="ParalaxFrag.glsl">
+      <Filter>Исходные файлы\Шейдеры</Filter>
+    </None>
+    <None Include="ParalaxReliefFrag.glsl">
+      <Filter>Исходные файлы\Шейдеры</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
