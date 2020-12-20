@@ -21,7 +21,7 @@ using namespace std;
 #include "Models.h"
 
 #include "Shader.h"
-const int N = 7;//количество моделей
+const int N = 8;//количество моделей
 Model MyModel[N];
 int  MyModelDraw[N];
 
@@ -133,6 +133,24 @@ void init()
 
 	MyModel[6].Position = glm::vec3(0.0f, -0.5f, -10.0f);
 	MyModel[6].Rotation = glm::vec3(PI/2, 0.0f, 0.0f);
+
+
+	//плоскость 2
+	MyModel[7].InitText(floor_vertices, sizeof(floor_vertices),
+		floor_indices, sizeof(floor_indices), GL_QUADS,
+		Shader("ParalaxVertex.glsl", "ParalaxReliefFrag.glsl"),
+		//Shader("TextureFongVertex.glsl", "FragNormalMap.glsl"),
+		floor_normals, floor_text_normal);
+	MyModel[7].Use();
+	MyModel[7].loatText("NormalMap.png");//"Normal-and-displacement-maps-before-and-after-a-collision-respectively-The-displacement.png"
+	MyModel[7].textLoc[0] = glGetUniformLocation(MyModel[6].program, "Map");
+
+	MyModel[7].loatText("DisplacementMap.png");// 
+	MyModel[7].textLoc[1] = glGetUniformLocation(MyModel[6].program, "Map2");
+
+
+	MyModel[7].Position = glm::vec3(-11.0f, -0.5f, -10.0f);
+	MyModel[7].Rotation = glm::vec3(PI / 2, PI / 4, 0.0f);
 	
 
 }
@@ -153,10 +171,9 @@ void display(void)
 	/*
 		GL_COLOR_BUFFER_BIT-заполняет буфер кадра заранее настроенным цветом
 		GL_DEPTH_BUFFER_BIT - очистка Z-буфера
-	*/	
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	*/		
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	//glm::mat4x4 
+	
 	glm::mat4x4 CameraRot = glm::rotate(CameraRotation.z, glm::vec3(0.0f, 0.0f, 1.0f))
 		* glm::rotate(CameraRotation.x, glm::vec3(1.0f, 0.0f, 0.0f))
 		* glm::rotate(CameraRotation.y, glm::vec3(0.0f, 1.0f, 0.0f))

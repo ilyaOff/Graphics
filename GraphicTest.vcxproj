@@ -184,6 +184,7 @@
     <None Include="CubeFrag.glsl" />
     <None Include="CubeVertex.glsl" />
     <None Include="ParalaxFrag.glsl" />
+    <None Include="ParalaxReliefFrag.glsl" />
     <None Include="ParalaxVertex.glsl" />
     <None Include="PyramidFrag.glsl" />
     <None Include="PyramidVertex.glsl" />
