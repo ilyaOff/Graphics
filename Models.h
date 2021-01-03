@@ -25,7 +25,7 @@ struct VertexText
 #include "Floor.h"
 #include "Sphereh.h"
 #include "Shader.h"
-//#include "Cat.h"
+#include "Cat.h"
 //#include "MakePoints.h"
 
 #define PI 3.14159265359
@@ -66,15 +66,20 @@ public:
 	~Model();
 	/*Model(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
-		const char* vertexPath, const char* fragmentPath);*/
-	//~Model();
-	//Model(const Model& a);
+		const char* vertexPath, const char* fragmentPath);
+	~Model();
+	Model(const Model& a);
+	*/
 	void glDrawModel(glm::mat4* proj, glm::vec3* Light,
 		glm::mat4* CameraV, glm::mat4* CameraRot = NULL);
 	
 	void Init(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices, GLenum modeDraw,
 		Shader sh, GLfloat* normals = NULL);
+
+	void Init(VertexText* vertices, GLuint size_vertices,
+		GLuint* ver_indices, GLuint size_indices,
+		GLenum modeDraw, Shader sh);
 
 	void InitText(GLfloat* vertices, GLuint size_vertices,
 		GLuint* ver_indices, GLuint size_indices,
@@ -383,6 +388,69 @@ void Model::Init(GLfloat* vertices, GLuint size_vertices,
 	delete[] points;
 }
 
+// готовые вершины
+void Model::Init(VertexText* points, GLuint size_vertices,
+	GLuint* ver_indices, GLuint size_indices,
+	GLenum modeDraw, Shader sh)
+{
+	Position = glm::vec3(0.0f, 0.0f, -4.0f);
+	Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	this->modeDraw = modeDraw;
+
+	program = sh.ID;
+
+	mvpLoc = glGetUniformLocation(program, "mvp");
+	mLoc = glGetUniformLocation(program, "m");
+	nmLoc = glGetUniformLocation(program, "nm");
+	CameraVLoc = glGetUniformLocation(program, "CameraV");
+	cameraRotLoc = glGetUniformLocation(program, "CameraRotation");
+	LightLoc = glGetUniformLocation(program, "LightPos");
+
+	//std::cout << "MOdelText ID=" << program << std::endl;
+	//-----------------------------------------------//
+	// Загрузка текстуры
+	//в другой функции
+	//создание вершин
+	// то же в другой функции
+	//-----------------------------------------------//
+	glGenBuffers(1, &vertexBuffer);//генерирует идентификатор буффера
+	glGenVertexArrays(1, &vertexArray);//создаем вершинный массив
+	glGenBuffers(1, &indexArray);
+
+	//указываем в буффере данных, что байты образуют вершины
+	glBindVertexArray(vertexArray);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
+	//загружаем данные в буффер
+	// *3, так как меньше размер??????
+	glBufferData(GL_ARRAY_BUFFER,size_vertices * sizeof(VertexText), points, GL_STATIC_DRAW);
+
+
+	sizeIndex = size_indices;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArray);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,  size_indices, &ver_indices[0], GL_STATIC_DRAW);
+
+
+	//смещение = 0, размер 3 float, не нужно нормализовывать, 
+	//лежат один за другим, // неверно для больше 1 атрибута
+	//лежат в текущем буфере(последний 0)
+	int tmpLoc = glGetAttribLocation(program, "modelPos");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), 0);
+	glEnableVertexAttribArray(tmpLoc);//номер атрибута 
+
+	tmpLoc = glGetAttribLocation(program, "modelNormal");
+	glVertexAttribPointer(tmpLoc, 3, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	tmpLoc = glGetAttribLocation(program, "modelTexCoor");
+	glVertexAttribPointer(tmpLoc, 2, GL_FLOAT, GL_FALSE, sizeof(VertexText), (void*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(tmpLoc);
+
+	glBindVertexArray(0);
+
+	//delete[] points;
+
+}
 
 void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 	GLuint* ver_indices, GLuint size_indices, 
@@ -440,7 +508,7 @@ void Model::InitText(GLfloat* vertices, GLuint size_vertices,
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);//указываем активный буфефр
 	//загружаем данные в буффер
-	glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(*points), points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size_vertices * sizeof(VertexText), points, GL_STATIC_DRAW);
 
 
 	sizeIndex = size_indices;

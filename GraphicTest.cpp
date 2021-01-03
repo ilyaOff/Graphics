@@ -21,7 +21,10 @@ using namespace std;
 #include "Models.h"
 
 #include "Shader.h"
-const int N = 8;//количество моделей
+
+#include "MakePoints.h"
+
+const int N = 9;//количество моделей
 Model MyModel[N];
 int  MyModelDraw[N];
 
@@ -53,14 +56,13 @@ void init()
 	glEnable(GL_DEPTH_TEST);//Включение теста по Z-буфферу
 	glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
-
-	
-
 	glClearColor(0.0, 0.1, 0.1, 0.0);//задает цвет для заполнения буфера кадра
 	//только ребра  - GL_LINE
 	//полностью - GL_FILL
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);		
-	
+
+
+	//--------------------------------------------------------------------------------//
 	//куб - положение источника света 
 	MyModel[0].Init(cube_vertices, sizeof(cube_vertices),
 		cube_indices, sizeof(cube_indices), GL_QUADS,
@@ -152,7 +154,42 @@ void init()
 	MyModel[7].Position = glm::vec3(-11.0f, -0.5f, -10.0f);
 	MyModel[7].Rotation = glm::vec3(PI / 2, PI / 4, 0.0f);
 	
+	//КОТ
+	VertexText* tmpver = NULL;
+	unsigned int* index;
+	unsigned int size1, size2;
+	MakeVertex_obj(cat_vertex, Cat_vertex_length,
+		cat_normal, Cat_normal_length,
+		cat_text, Cat_text_length,
+		cat_obj_index, Cat_index_length,
+		&tmpver, &index,
+		&size1, &size2);
+	
+	/*
+	MakeVertex_obj(cube_vertices, 24/3,
+		cube_normal, 24/3,
+		cube_text2, 48/3,
+		cube_indices3, 72/12,
+		&tmpver, &index,
+		&size1, &size2);
+		*/
+	
+	if(tmpver == NULL)
+		cout << "NULL" << endl;
+	MyModel[8].Init(tmpver, size1,
+		index, (GLuint)size2, GL_QUADS,
+		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"));
+	//MyModel[8].Position = glm::vec3(0.0f, 20.0f, -25.0f);
+	MyModel[8].Position = glm::vec3(0.0f, 5.0f, -5.0f);
+	MyModel[8].Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	MyModel[8].Use();
 
+
+	MyModel[8].loatText("Cat_diffuse.jpg");
+	MyModel[8].textLoc[0] = glGetUniformLocation(MyModel[8].program, "Map");
+
+	delete[] tmpver;
+	delete[] index;
 }
 
 glm::mat4x4 proj;
@@ -209,33 +246,11 @@ void display(void)
 
 	CamZerPos = glm::vec3(glm::inverse(ReflectMat) * glm::vec4(CamZerPos, 1));
 	
-	//CamZerRot = glm::vec3(-PI / 2 +CameraRotation.x, CameraRotation.y, CameraRotation.z);//вроде правильно	
-	
-	/*
-	glm::rotate((*CameraRot).z, glm::vec3(0.0f, 0.0f, 1.0f))*
-		glm::rotate((*CameraRot).x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate((*CameraRot).y, glm::vec3(0.0f, 1.0f, 0.0f))
-		*/
-	/*
-	glm::quat a = glm::quat(glm::rotate(CameraPosition.z, glm::vec3(0.0f, 0.0f, 1.0f))
-		* glm::rotate(CameraPosition.x, glm::vec3(1.0f, 0.0f, 0.0f))
-		* glm::rotate(CameraPosition.y, glm::vec3(0.0f, 1.0f, 0.0f)));
-	glm::quat b = glm::quat(MyModel[3].Rotation);
-	
-	*/
-	
+	//---------------------------------------------------//
 	//Будет ошибка, так как не работаю с кватернионами
 	CamZerRot = CameraRotation;// +MyModel[3].Rotation;
-	//CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y, PI - CamZerRot.z);//!!
 	CamZerRot = glm::vec3(-CamZerRot.x, CamZerRot.y,  CamZerRot.z);//!!!!!!!!!!работает без доп вращения, scale(1,-1,1)
 	
-	
-	//glm::mat4x4 ZerRot =  glm::mat4x4(glm::quat(-MyModel[3].Rotation));	
-	//CamZerRot = glm::vec3(ZerRot * glm::vec4(CameraRotation, 1));
-	//CamZerRot = glm::vec3(-CamZerRot.x,CamZerRot.y, CamZerRot.z);
-	//CamZerRot = glm::vec3(glm::inverse(ZerRot) * glm::vec4(CamZerRot, 1));
-	//glm::vec3 lightRef = glm::vec3(ReflectMat * glm::vec4(LightDirection, 1));
-
 	/*
 	std::cout << "CAM " <<
 		CameraPosition.x << ' ' << CameraPosition.y << ' ' << CameraPosition.z << endl 
@@ -246,9 +261,8 @@ void display(void)
 		CamZerPos.x << ' ' << CamZerPos.y << ' ' << CamZerPos.z << endl << endl
 		<< CamZerRot.x << ' ' << CamZerRot.y << ' ' << CamZerRot.z << endl;;
 */
-	
+	//---------------------------------------------------//
 	glm::mat4x4 CameraVReflect = glm::scale(glm::vec3(1, -1, 1))
-				//*glm::mat4x4(a)
 				* glm::rotate(CamZerRot.z, glm::vec3(0.0f, 0.0f, 1.0f))
 				* glm::rotate(CamZerRot.x, glm::vec3(1.0f, 0.0f, 0.0f))
 				* glm::rotate(CamZerRot.y, glm::vec3(0.0f, 1.0f, 0.0f))
@@ -323,9 +337,14 @@ void display(void)
 	//glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	//-------------------------------------------------//
+	//ИТОГОВАЯ ОТРИСОВКА!!!!!!!!!!!!!!!!!!!!!!
 	glDepthFunc(GL_LESS);
 	/////////////////////glEnable(GL_CULL_FACE);//Отрисовка только лицевых граней
 	glFrontFace(GL_CW);
+	//glFrontFace(GL_CCW);
+	//glDisable(GL_CULL_FACE);//Отрисовка только лицевых граней
+
+
 	glDisable(GL_STENCIL_TEST);	
 	
 	for (int i = 0; i < N; i++)

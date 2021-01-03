@@ -172,6 +172,7 @@
     <ClInclude Include="Cube1.h" />
     <ClInclude Include="Floor.h" />
     <ClInclude Include="FragNormalMap.glsl" />
+    <ClInclude Include="MakePoints.h" />
     <ClInclude Include="Models.h" />
     <ClInclude Include="MyLib\glut-3.7\include\GL\glut.h" />
     <ClInclude Include="Pyramid.h" />
@@ -192,6 +193,7 @@
     <None Include="TextureFongVertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Cat_diffuse.jpg" />
     <Image Include="DisplacementMap.png" />
     <Image Include="DisplacementMap2.png" />
     <Image Include="Metall1.jpg" />

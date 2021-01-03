@@ -47,11 +47,14 @@
     <ClInclude Include="Sphereh.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="Cat.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="FragNormalMap.glsl">
       <Filter>Исходные файлы\Шейдеры</Filter>
+    </ClInclude>
+    <ClInclude Include="MakePoints.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="Cat.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +106,9 @@
       <Filter>Файлы ресурсов</Filter>
     </Image>
     <Image Include="Normal-and-displacement-maps-before-and-after-a-collision-respectively-The-displacement.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="Cat_diffuse.jpg">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>
