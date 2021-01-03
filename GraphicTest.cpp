@@ -534,7 +534,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
 	glutInitWindowPosition(100, 20);
 	glutInitWindowSize(1280, 720);
-	glutCreateWindow("SIMPLE PROGRAM");
+	glutCreateWindow("SIMPLE PROGRAM2");
 	
 	glewInit();
 	

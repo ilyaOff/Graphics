@@ -68,23 +68,25 @@ void main(void) {
 	
 	float shiftH = 1.0f/CountStep;
 	vec2 shiftTex = et.xy * scale / ( CountStep * et.z );
-	float h =(texture2D(Map2, textCoor).r -0.5f);
+	vec2 T1 = textCoor - et.xy *scale / ( et.z );
+	float minishift = -0.5f;
+	float h =(texture2D(Map2, T1).r +minishift);
 	float tmpLayerH = 1.0f;
-	vec2 T1 = textCoor;
+	
 	
 	while(h < tmpLayerH)
 	{
 		tmpLayerH -= shiftH;
 		T1 += shiftTex;
-		h =(texture2D(Map2, T1).r -0.5f);
+		h =(texture2D(Map2, T1).r +minishift);
 	}
 
-	
+	 
 	//if(h > tmpLayerH)
 	{
 		shiftTex *= 0.5;
 		T1   = T1 - shiftTex;
-		h =(texture2D(Map2, T1).r -0.5f);
+		h =(texture2D(Map2, T1).r +minishift);
 		for ( int i = 0; i < 5; i++ )
 		{
 			shiftTex *= 0.5;
@@ -96,7 +98,7 @@ void main(void) {
 			{
 				T1 -= shiftTex;
 			}	
-			h =(texture2D(Map2, T1).r -0.5f);
+			h =(texture2D(Map2, T1).r +minishift);
 		}
 	}
 	
