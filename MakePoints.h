@@ -10,8 +10,8 @@
 {
 	
 	//(*size) = vertex_count *3;
-	 (*size) = polygon_count * 4;// по 4 вершины в полигоне
-	 (*size_index) = polygon_count * 4;
+	 (*size) = polygon_count * 4*3;// по 4 вершины в полигоне
+	 (*size_index) = polygon_count * 4*3;
 	(*res) = new VertexText[(*size)];
 	(*ind) = new unsigned int[(*size_index)];
 
@@ -24,6 +24,10 @@
 		(*res)[i].position = glm::vec3(0, 0, 0);
 		(*res)[i].texcoords = glm::vec2(0, 0);
 		(*res)[i].normal = glm::vec3(0, 0, 0);
+	}
+	for (unsigned int i = 0; i < (*size_index); i++)
+	{
+		
 		(*ind)[i] = 0;
 	}
 
@@ -66,12 +70,10 @@
 		}
 
 	}
-	for (unsigned int i = 0; i < (*size); i++)
+//	for (unsigned int i = 0; i < (*size_index)*3; i+=3)
 	{		
-		if ((*ind)[i] == 0)
-		{ 
-			cout << "ERROR" << endl;
-		}
+//		if(i%3 == 0)
+//			(*ind)[i/3] = (index[i] - 1);
 	}
 	std::cout << "END Model MakePoints" << endl;
 	std::cout << "Point:" << (*ind)[0] << endl;

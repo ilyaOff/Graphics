@@ -176,8 +176,8 @@ void init()
 	
 	if(tmpver == NULL)
 		cout << "NULL" << endl;
-	MyModel[8].Init(tmpver, size1,
-		index, (GLuint)size2, GL_QUADS,
+	MyModel[8].Init(tmpver, (GLuint)size1,
+		index, (GLuint)size2*4, GL_QUADS,
 		Shader("TextureFongVertex.glsl", "TextureFongFrag.glsl"));
 	//MyModel[8].Position = glm::vec3(0.0f, 20.0f, -25.0f);
 	MyModel[8].Position = glm::vec3(0.0f, 5.0f, -5.0f);
